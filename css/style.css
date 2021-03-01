@@ -1,0 +1,17 @@
+body{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+section{
+    max-width: 300px;
+}
+nav{
+    margin: 15px;
+}
+
+#map { 
+    height: 700px; 
+    width: 400px;
+    align-self:flex-start;
+}
