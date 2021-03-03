@@ -41,3 +41,12 @@ h2{
 #end{
     float: right;
 }
+
+@media only screen and (max-width: 900px){
+    ul{
+        flex: 0 0 100%;
+        list-style: none;
+        text-align-last: left;
+        padding: 0;
+    }
+}

@@ -2,20 +2,19 @@
 
 //proxy rss sivulle
 const proxy = 'https://cors.bridged.cc/'
-
-//RSS syöteestä tallennettut tiedot
+let map = null;
+//Ilmoitus objecti, joissa on kaikki saatu tieto hätätapauksesta
 class Ilmoitus {
-    constructor(nkaupunki,ncoords,ntapahtuma,naika) {
+    constructor(nkaupunki,ntapahtuma,naika) {
         this.kaupunki = nkaupunki;
-        this.coords = ncoords;
         this.tapahtuma = ntapahtuma;
         this.aika = naika;
     }
-  }
+}
 
 //laittaa kartan sivustolle
 const loadMap = () =>{
-    const map = L.map('map').setView([65.9, 25.74], 5);
+    map = L.map('map').setView([65.9, 25.74], 5);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -42,26 +41,26 @@ const getData = async () =>{
 
 
 //Hea jollain apilla kaupungin koordinaatit, jotta saadaan merkattua kartalle
-const getCoords = async (kaupunki) =>{
-    const url = `http://api.digitransit.fi/geocoding/v1/search?text=${kaupunki}`
+const setMapPoints =  (tapaus) =>{
+    const url = `http://api.digitransit.fi/geocoding/v1/search?text=${tapaus.kaupunki}`
 
     fetch(url)
     .then((response) => response.json())
     .then((tiedot) => {
-        const test = [tiedot.bbox[2],tiedot.bbox[3]]
-
-        return [tiedot.bbox[2],tiedot.bbox[3]]
+        const marker = L.marker([tiedot.features[0].geometry.coordinates[1],tiedot.features[0].geometry.coordinates[0]]).addTo(map);
+        marker.bindPopup(`<b>${tapaus.kaupunki}</b><br>${tapaus.tapahtuma}`);
     })
 }
-const parseXmlData = (data) =>{
+
+//Muuta saatu xml tiedosto ilmoitus listaksi
+const parseXmlData =  (data) =>{
     let ilmoitukset = [];
     const items = data.querySelector('channel').querySelectorAll('item');
     items.forEach(tiedote => {
         const kaupunki = tiedote.querySelector('title').innerHTML.split(',')[0];
         const tapahtuma = tiedote.querySelector('title').innerHTML.split(',')[1];
-        const coords = 0;
         const aika = new Date(tiedote.querySelector('pubDate').innerHTML)
-        ilmoitukset.push(new Ilmoitus(kaupunki, coords, tapahtuma, aika))
+        ilmoitukset.push(new Ilmoitus(kaupunki, tapahtuma, aika))
     })
     return ilmoitukset;
 }
@@ -85,6 +84,8 @@ const printToSite = async (amount = -1) =>{
             li.appendChild(spanStart);
             li.appendChild(spanEnd);
             ul.appendChild(li);
+
+            setMapPoints(data[item]);
         }
     }
     else{
@@ -99,6 +100,8 @@ const printToSite = async (amount = -1) =>{
             li.appendChild(spanStart);
             li.appendChild(spanEnd);
             ul.appendChild(li);
+
+            setMapPoints(ilmoitus);
         });
     }
 }
