@@ -5,10 +5,11 @@ const proxy = 'https://cors.bridged.cc/'
 let map = null;
 //Ilmoitus objecti, joissa on kaikki saatu tieto hätätapauksesta
 class Ilmoitus {
-    constructor(nkaupunki,ntapahtuma,naika) {
+    constructor(nkaupunki,ntapahtuma,naika, ncoords) {
         this.kaupunki = nkaupunki;
         this.tapahtuma = ntapahtuma;
         this.aika = naika;
+        this.coords = ncoords;
     }
 }
 
@@ -41,56 +42,89 @@ const getData = async () =>{
 
 
 //Hea jollain apilla kaupungin koordinaatit, jotta saadaan merkattua kartalle
-const setMapPoints =  (tapaus) =>{
-    const url = `http://api.digitransit.fi/geocoding/v1/search?text=${tapaus.kaupunki}`
+const setMapPoints = (tapaus) =>{
+    const marker = L.marker(tapaus.coords);
 
-    fetch(url)
-    .then((response) => response.json())
-    .then((tiedot) => {
-        const marker = L.marker([tiedot.features[0].geometry.coordinates[1],tiedot.features[0].geometry.coordinates[0]]).addTo(map);
-        marker.bindPopup(`<b>${tapaus.kaupunki}</b><br>${tapaus.tapahtuma}`);
-    })
+    marker.bindPopup(`<b>${tapaus.kaupunki}</b><br>${tapaus.tapahtuma}`);
+    return marker;
+}
+
+//Hea koordinaatit kaupungit.js tiedostosta
+const getCoords = async (kaupunki) =>{
+    const kau = kaupungit.find(etsiKaupunki => etsiKaupunki.name === kaupunki)
+    return [kau.coordinates[1], kau.coordinates[0]];
 }
 
 //Muuta saatu xml tiedosto ilmoitus listaksi
-const parseXmlData =  (data) =>{
+const parseXmlData = async (data) =>{
     let ilmoitukset = [];
     const items = data.querySelector('channel').querySelectorAll('item');
-    items.forEach(tiedote => {
-        const kaupunki = tiedote.querySelector('title').innerHTML.split(',')[0];
-        const tapahtuma = tiedote.querySelector('title').innerHTML.split(',')[1];
-        const aika = new Date(tiedote.querySelector('pubDate').innerHTML)
-        ilmoitukset.push(new Ilmoitus(kaupunki, tapahtuma, aika))
-    })
+
+    for (let item = 0; item < items.length -1; item++) {
+        const kaupunki = items[item].querySelector('title').innerHTML.split(',')[0];
+        const tapahtuma = items[item].querySelector('title').innerHTML.split(',')[1];
+        const aika = new Date(items[item].querySelector('pubDate').innerHTML);
+        const coords = await getCoords(kaupunki.split('/')[0]);
+        ilmoitukset.push(new Ilmoitus(kaupunki, tapahtuma, aika, coords))
+    }
+
     return ilmoitukset;
 }
 
 //Printaa sivulle tiedot ul listaan
 //Jos haluaa maksimimäärän listan 
-const printToSite = async (amount = -1) =>{
+const printToSite = async (amount = -1, multiMarkers = false) =>{
     const data = await getData();
-
-    const ul = document.querySelector('ul');
+    const markers = L.markerClusterGroup({maxClusterRadius: 30});
+    const tabel = document.querySelector('#tapaukset');
 
     if(amount >= 0){
         for (let item = 0; item < amount; item++) {
-            const li = document.createElement("li");
-            const spanStart = document.createElement("span");
-            const spanEnd = document.createElement("span");
-            spanStart.innerText = data[item].kaupunki;
-            spanStart.id = "start"
-            spanEnd.innerText = data[item].tapahtuma;
-            spanEnd.id = "end"
-            li.appendChild(spanStart);
-            li.appendChild(spanEnd);
-            ul.appendChild(li);
+            const kaupunki = document.createElement("td");
+            const tapahtuma = document.createElement("td");
+            const tr = document.createElement("tr");
+            kaupunki.innerText = data[item].kaupunki;
+            tapahtuma.innerText = data[item].tapahtuma;
+            tr.appendChild(kaupunki);
+            tr.appendChild(tapahtuma);
+            tabel.querySelector("tbody").appendChild(tr);
 
-            setMapPoints(data[item]);
+            const marker = await setMapPoints(data[item]);
+            if(multiMarkers) markers.addLayer(marker);
+            else marker.addTo(map);
+            
         }
     }
     else{
-        data.forEach(ilmoitus => {
-            const li = document.createElement("li");
+        data.forEach(async ilmoitus => {
+            
+            const kaupunki = document.createElement("td");
+
+            const aika = document.createElement("td");
+            const tapahtuma = document.createElement("td");
+            
+            const tr = document.createElement("tr");
+            tr.addEventListener("click", () => {
+                map.flyTo(ilmoitus.coords, 10);
+            })
+            kaupunki.innerText = ilmoitus.kaupunki;
+            tapahtuma.innerText = ilmoitus.tapahtuma;
+
+            const dd = ilmoitus.aika.getDate();
+            const mm = ilmoitus.aika.getMonth();
+
+            const hh = ilmoitus.aika.getHours();
+            const min = ilmoitus.aika.getMinutes(); 
+            const ss = ilmoitus.aika.getSeconds();
+
+            aika.innerText = `${dd}.${mm} - ${hh}:${min}:${ss}`;
+            tr.appendChild(kaupunki);
+            tr.appendChild(aika);
+            tr.appendChild(tapahtuma);
+            
+            tabel.querySelector("tbody").appendChild(tr);
+
+            /* const li = document.createElement("li");
             const spanStart = document.createElement("span");
             const spanEnd = document.createElement("span");
             spanStart.innerText = ilmoitus.kaupunki;
@@ -99,11 +133,13 @@ const printToSite = async (amount = -1) =>{
             spanEnd.id = "end"
             li.appendChild(spanStart);
             li.appendChild(spanEnd);
-            ul.appendChild(li);
+            ul.appendChild(li); */
 
-            setMapPoints(ilmoitus);
+            const marker = setMapPoints(ilmoitus);
+            markers.addLayer(marker);
         });
     }
+    map.addLayer(markers);
 }
-loadMap()
-printToSite(10)
+
+const getMap = () => map;

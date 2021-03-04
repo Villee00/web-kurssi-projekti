@@ -1,0 +1,2 @@
+loadMap()
+printToSite(10)
