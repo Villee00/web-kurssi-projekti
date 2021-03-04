@@ -1,15 +1,53 @@
 body{
+    margin: 0;
     display: flex;
     flex-direction: column;
     flex-flow: wrap;
     text-align-last: center;
     justify-content: center;
+    background-color: #f3f3f5;
 }
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+  /* Add a black background color to the top navigation */
+
+.topnav {
+  background-color: #2c2e39;
+  overflow: hidden;
+}
+
+/* Style the links inside the navigation bar */
+.topnav a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.topnav a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+
 section{
     max-width: 300px;
 }
 nav{
-    margin: 15px;
+
     flex-basis: 100%;
 }
 
@@ -19,8 +57,9 @@ nav{
     min-width: 300px;
     align-self:flex-start;
     flex: 0 0 50%;
-    
+    outline: 10px #7f6791 groove; 
 }
+
 header{
     flex-basis: 100%;
 }
@@ -29,11 +68,14 @@ ul{
     flex: 0 0 50%;
     list-style: none;
     text-align-last: left;
-    
 }
 li{
-    padding: 20px;
+    padding: 10px;
+    margin: 10px;
+    outline: 2px #2c2e39 groove;
+    background-color: #f0c060;
 }
+
 h2{
     flex-basis: 100%;
 }
@@ -49,4 +91,16 @@ h2{
         text-align-last: left;
         padding: 0;
     }
+  
+  
 }
+
+
+
+
+
+
+
+
+
+
