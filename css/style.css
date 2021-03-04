@@ -5,6 +5,7 @@ body{
     flex-flow: wrap;
     text-align-last: center;
     justify-content: center;
+    background-color: #f3f3f5;
 }
 
 img {
@@ -58,6 +59,7 @@ nav{
     outline: 10px #7f6791 groove !important;  
     margin-bottom: 100px;
 }
+
 header{
     flex-basis: 100%;
 }
@@ -66,7 +68,6 @@ ul{
     flex: 0 0 50%;
     list-style: none;
     text-align-last: left;
-    
 }
 
 h2{
