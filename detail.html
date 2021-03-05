@@ -33,26 +33,32 @@
         
     </article>
     <h2>Hätätapaukset</h2>
-    <form action="#">
-        <input type="text">
-        <input type="submit" value="Etsi">
-    </form>
-    
-    <div id="map"></div>
-    <div id="table-scroll">
-        <table id="tapaukset">
-            <thead>
-                <tr>
-                    <th>Kaupunki</th>
-                    <th>Aika</th>
-                    <th>Tapahtuma</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-    
+
+    <main>
+        <b>Fillteröi kaupungilla</b>
+        <span class="custom-dropdown">
+            <select name="kaupunkiList" id="kaupunkiList" > 
+                <option value="default">Kaikki</option>
+            </select>
+        </span>
+        <article>
+            <div id="map"></div>
+            <div id="table-scroll">
+                <table id="tapaukset">
+                    <thead>
+                        <tr>
+                            <th>Kaupunki</th>
+                            <th>Aika</th>
+                            <th>Tapahtuma</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </main>
+        
     <script src="./js/index.js"></script>
     <script src="./js/detail.js"></script>
 </body>
