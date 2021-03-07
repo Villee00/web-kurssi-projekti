@@ -51,8 +51,11 @@ const setMapPoints = (tapaus) =>{
 
 //Hea koordinaatit kaupungit.js tiedostosta
 const getCoords = (kaupunki) =>{
-    const kau = kaupungit.find(etsiKaupunki => etsiKaupunki.name === kaupunki);
-    return [kau.coordinates[1], kau.coordinates[0]];
+    let coords = kaupungit.find(etsiKaupunki => etsiKaupunki.name === kaupunki);
+    if(coords === undefined){ 
+        return getUnknownCoords(kaupunki);
+    } 
+    return [coords.coordinates[1], coords.coordinates[0]];
 };
 
 
@@ -155,6 +158,7 @@ const showCity = (city) => {
         map.flyTo(coords, 10);
 
         updateList(city);
+        getWeather(city.split('/')[0]);
     }
     else{
         map.flyTo([65.9, 25.74], 5);
@@ -222,4 +226,53 @@ const updateList = (city = "default") =>{
     table.appendChild(thead);
     table.appendChild(tbody);
     div.appendChild(table);
+}
+
+
+const getWeather = async (city) =>{
+    const url = `https://www.ilmatieteenlaitos.fi/api/weather/forecasts?place=${city.toLowerCase()}`;
+    let stationWind = "Ei tietoa";
+    let stationVisibility = "Ei tietoa";
+    let stationName = "Ei tietoa";
+    let stationTemp = "Ei tietoa";
+
+    const station = await fetch(url,{"X-Requested-With":"XMLHttpRequest"})
+    .then(response => response.json())
+    .then(weatherData => weatherData.observationStations.stationData[0])
+ 
+    const weather = await fetch(`https://www.ilmatieteenlaitos.fi/observation-data?station=${station.id}`)
+    .then(response => response.json())
+
+    stationTemp = weather.t2m[weather.t2m.length -1][1] + " C";
+    if(station.names.hasOwnProperty("name")){
+        stationName = station.names.name.text;
+    }
+    else{
+        stationName = station.names[0].text;
+    }
+
+    if(weather.hasOwnProperty("Visibility")){
+        const mToKm = weather.Visibility[weather.t2m.length -1][1] / 1000;
+        stationVisibility = mToKm.toFixed(2) + " km"
+    }
+    if(weather.hasOwnProperty("WindSpeedMS")){
+        stationWind = weather.WindSpeedMS[weather.t2m.length -1][1] + " m/s"
+    }
+
+    const htmlWeather = document.querySelector("#lampo");
+    const p = document.querySelector("#weather-city-text");
+    const windTxt = document.querySelector("#weather-wind-text");
+    const visibilityTxt = document.querySelector("#weather-visibility-text");
+
+    p.innerHTML = stationName;
+    windTxt.innerHTML = stationWind;
+    visibilityTxt.innerHTML = stationVisibility;
+    htmlWeather.innerHTML = stationTemp;
+}
+
+async function getUnknownCoords(kaupunki) {
+    const coords = await fetch(`http://api.digitransit.fi/geocoding/v1/search?text=${kaupunki}`)
+        .then(response => response.json())
+        .then(data => data.features[0].geometry.coordinates);
+    return [coords[1], coords[0]];
 }

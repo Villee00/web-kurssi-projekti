@@ -35,27 +35,44 @@
     <h2>Hätätapaukset</h2>
 
     <main>
-        <b>Fillteröi kaupungilla</b>
-        <span class="custom-dropdown">
-            <select name="kaupunkiList" id="kaupunkiList" > 
-                <option value="default">Kaikki</option>
-            </select>
-        </span>
         <article>
+            <section id="filter">
+                <b>Fillteröi kaupungilla</b>
+                <span class="custom-dropdown">
+                    <select name="kaupunkiList" id="kaupunkiList" > 
+                        <option value="default">Kaikki</option>
+                    </select>
+                </span>
+            </section>
             <div id="map"></div>
-            <div id="table-scroll">
-                <table id="tapaukset">
-                    <thead>
-                        <tr>
-                            <th>Kaupunki</th>
-                            <th>Aika</th>
-                            <th>Tapahtuma</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
+            <section id="data">
+                <div id="table-scroll">
+                    <table id="tapaukset">
+                        <thead>
+                            <tr>
+                                <th>Kaupunki</th>
+                                <th>Aika</th>
+                                <th>Tapahtuma</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+    
+                <div id="weather">
+                    <h1>Sää</h1>
+                    <div id="weather-city">
+                        <p id="weather-city-text">Espoo</p>
+                    </div>
+                    <h2 id="lampo">10C</h2>
+
+                    <span>Tuuli:</span> <strong id="weather-wind-text"> 60</strong>
+                    <br>
+                    <span>Näkyvyys:</span> <strong id="weather-visibility-text">100metriä</strong>
+                    
+                </div>
+            </section>
         </article>
     </main>
         
