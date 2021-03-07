@@ -5,13 +5,39 @@
 const proxy = 'https://cors.bridged.cc/';
 let map = null;
 let data = null;
+
+//Iconien kokojenmukaan 
+const LeafIconSmall = L.Icon.extend({
+    options: {
+        iconSize:     [24, 24],
+        popupAnchor: [0, -12],
+    }
+});
+const LeafIconMid = L.Icon.extend({
+    options: {
+        iconSize:     [32, 32],
+        popupAnchor: [0, -12],
+    }
+});
+const LeafIconLarge = L.Icon.extend({
+    options: {
+        iconSize:     [48, 48],
+        popupAnchor: [0, -12],
+    }
+});
+
+const crashUrl = './icons/crash-48x48-126779.png',
+    housefireUrl = './icons/fire-48x48-house.png',
+    fireUrl = './icons/fire-48x48-fire.png',
+    sirenUrl = './icons/siren-48x48-520570.png';
 //Ilmoitus objecti, joissa on kaikki saatu tieto hätätapauksesta
 class Ilmoitus {
-    constructor(nkaupunki,ntapahtuma,naika, ncoords) {
+    constructor(nkaupunki,ntapahtuma,naika, nkoordinaatit, nkoko) {
         this.kaupunki = nkaupunki;
         this.tapahtuma = ntapahtuma;
         this.aika = naika;
-        this.coords = ncoords;
+        this.koordinaatit = nkoordinaatit;
+        this.koko = nkoko;
     }
 }
 
@@ -43,19 +69,46 @@ const getData = async () =>{
 };
 //Hea jollain apilla kaupungin koordinaatit, jotta saadaan merkattua kartalle
 const setMapPoints = (tapaus) =>{
-    const marker = L.marker(tapaus.coords);
-    
+    let tapausIcon = null;
+
+    //vaihda kartalla olevan kuvakkeen koko hätätapauksen koosta riippuen
+    switch (tapaus.koko) {
+        case "pieni":
+            if(tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconSmall({iconUrl: housefireUrl});
+            else if(tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconSmall({iconUrl: fireUrl});
+            else if(tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconSmall({iconUrl: crashUrl});
+            else tapausIcon = new LeafIconSmall({iconUrl: sirenUrl});
+            break;
+        case "keskisuuri":
+            if(tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconMid({iconUrl: housefireUrl});
+            else if(tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconMid({iconUrl: fireUrl});
+            else if(tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconMid({iconUrl: crashUrl});
+            else tapausIcon = new LeafIconMid({iconUrl: sirenUrl});
+            break;
+
+        case "suuri":
+            if(tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconLarge({iconUrl: housefire});
+            else if(tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconLarge({iconUrl: fireUrl});
+            else if(tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconLarge({iconUrl: crashUrl});
+            else tapausIcon = new LeafIconLarge({iconUrl: sirenUrl});
+            break;
+        default:
+            console.log("Ei toiminu");
+            tapausIcon = new LeafIconSmall({iconUrl: sirenUrl});
+            break;
+    }
+    const marker = L.marker(tapaus.koordinaatit, {icon: tapausIcon});
     marker.bindPopup(`<b>${tapaus.kaupunki}</b><br>${tapaus.tapahtuma}`);
     return marker;
 };
 
 //Hea koordinaatit kaupungit.js tiedostosta
-const getCoords = (kaupunki) =>{
-    let coords = kaupungit.find(etsiKaupunki => etsiKaupunki.name === kaupunki);
-    if(coords === undefined){ 
-        return getUnknownCoords(kaupunki);
+const getKoordinaatit = (kaupunki) =>{
+    let koordinaatit = kaupungit.find(etsiKaupunki => etsiKaupunki.name === kaupunki);
+    if(koordinaatit === undefined){ 
+        return getUnknownKoordinaatit(kaupunki);
     } 
-    return [coords.coordinates[1], coords.coordinates[0]];
+    return [koordinaatit.coordinates[1], koordinaatit.coordinates[0]];
 };
 
 
@@ -69,8 +122,12 @@ const parseXmlData = async (data) =>{
         const kaupunki = items[item].querySelector('title').innerHTML.split(',')[0];
         const tapahtuma = items[item].querySelector('title').innerHTML.split(',')[1];
         const aika = new Date(items[item].querySelector('pubDate').innerHTML);
-        const coords = await getCoords(kaupunki.split('/')[0]);
-        ilmoitukset.push(new Ilmoitus(kaupunki, tapahtuma, aika, coords));
+        const koordinaatit = await getKoordinaatit(kaupunki.split('/')[0]);
+        let koko = "pieni";
+        if(tapahtuma.split(": ").length >= 2) koko = tapahtuma.split(":")[1].replace(/ /g,'');
+
+        
+        ilmoitukset.push(new Ilmoitus(kaupunki, tapahtuma, aika, koordinaatit, koko));
     }
     
     return ilmoitukset;
@@ -80,7 +137,7 @@ const parseXmlData = async (data) =>{
 //Jos haluaa maksimimäärän listan 
 const printToSite = async (amount = -1, filter = null) =>{
     data = await getData();
-    const markers = L.markerClusterGroup({maxClusterRadius: 30});
+    const markers = L.markerClusterGroup({maxClusterRadius: 20});
     const tabel = document.querySelector('#tapaukset');
     
     
@@ -116,7 +173,7 @@ const printToSite = async (amount = -1, filter = null) =>{
             
             const tr = document.createElement("tr");
             tr.addEventListener("click", () => {
-                map.flyTo(ilmoitus.coords, 10);
+                map.flyTo(ilmoitus.koordinaatit, 10);
             });
             kaupunki.innerText = ilmoitus.kaupunki;
             tapahtuma.innerText = ilmoitus.tapahtuma;
@@ -154,8 +211,8 @@ const printToSite = async (amount = -1, filter = null) =>{
 
 const showCity = (city) => {
     if(city !== "default"){
-        const coords = getCoords(city.split('/')[0]);
-        map.flyTo(coords, 10);
+        const koordinaatit = getKoordinaatit(city.split('/')[0]);
+        map.flyTo(koordinaatit, 10);
 
         updateList(city);
         getWeather(city.split('/')[0]);
@@ -199,7 +256,7 @@ const updateList = (city = "default") =>{
         
         const tr = document.createElement("tr");
         tr.addEventListener("click", () => {
-            map.flyTo(filtterdList[ilmoitus].coords, 10);
+            map.flyTo(filtterdList[ilmoitus].koordinaatit, 10);
         });
         kaupunki.innerText = filtterdList[ilmoitus].kaupunki;
         tapahtuma.innerText = filtterdList[ilmoitus].tapahtuma;
@@ -228,7 +285,7 @@ const updateList = (city = "default") =>{
     div.appendChild(table);
 }
 
-
+//Hea ensiksi paikkakunnan lähin sää asemma ja sen jälkeen hea sen asemman luvut
 const getWeather = async (city) =>{
     const url = `https://www.ilmatieteenlaitos.fi/api/weather/forecasts?place=${city.toLowerCase()}`;
     let stationWind = "Ei tietoa";
@@ -243,21 +300,19 @@ const getWeather = async (city) =>{
     const weather = await fetch(`https://www.ilmatieteenlaitos.fi/observation-data?station=${station.id}`)
     .then(response => response.json())
 
+    //Kaikki annetut asemmat ovat sää asemmia, joten tarkastus on turha
     stationTemp = weather.t2m[weather.t2m.length -1][1] + " C";
-    if(station.names.hasOwnProperty("name")){
-        stationName = station.names.name.text;
-    }
-    else{
-        stationName = station.names[0].text;
-    }
+
+    //Testaa mitä tietoa on asemmalla saatavilla
+    if(station.names.hasOwnProperty("name")) stationName = station.names.name.text;
+    else stationName = station.names[0].text;
 
     if(weather.hasOwnProperty("Visibility")){
         const mToKm = weather.Visibility[weather.t2m.length -1][1] / 1000;
-        stationVisibility = mToKm.toFixed(2) + " km"
+        stationVisibility = mToKm.toFixed(2) + " km";
     }
-    if(weather.hasOwnProperty("WindSpeedMS")){
-        stationWind = weather.WindSpeedMS[weather.t2m.length -1][1] + " m/s"
-    }
+    if(weather.hasOwnProperty("WindSpeedMS")) stationWind = weather.WindSpeedMS[weather.t2m.length -1][1] + " m/s";
+    
 
     const htmlWeather = document.querySelector("#lampo");
     const p = document.querySelector("#weather-city-text");
@@ -270,9 +325,9 @@ const getWeather = async (city) =>{
     htmlWeather.innerHTML = stationTemp;
 }
 
-async function getUnknownCoords(kaupunki) {
-    const coords = await fetch(`http://api.digitransit.fi/geocoding/v1/search?text=${kaupunki}`)
+async function getUnknownKoordinaatit(kaupunki) {
+    const koordinaatit = await fetch(`http://api.digitransit.fi/geocoding/v1/search?text=${kaupunki}`)
         .then(response => response.json())
         .then(data => data.features[0].geometry.coordinates);
-    return [coords[1], coords[0]];
+    return [koordinaatit[1], koordinaatit[0]];
 }
