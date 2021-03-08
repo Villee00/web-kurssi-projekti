@@ -1,4 +1,5 @@
 body{
+    font-family: 'Rubik';
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -98,6 +99,7 @@ tr{
         list-style: none;
         text-align-last: left;
         padding: 10px;
+        margin: 0px;
     }
 }
 

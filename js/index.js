@@ -48,7 +48,7 @@ const loadMap = () =>{
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-
+    
 };
 
 //Hae RSS syötteestä tiedot ja tallenna ne objektiin, jotta niitä voi käyttää kartassa. (CORS ongelma vielä ei toimi))
@@ -72,6 +72,7 @@ const setMapPoints = (tapaus) =>{
     let tapausIcon = null;
 
     //vaihda kartalla olevan kuvakkeen koko hätätapauksen koosta riippuen
+    //jos koosta ei ole tieto pistetään kuvaka pienimmäksi
     switch (tapaus.koko) {
         case "pieni":
             if(tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconSmall({iconUrl: housefireUrl});
@@ -87,7 +88,7 @@ const setMapPoints = (tapaus) =>{
             break;
 
         case "suuri":
-            if(tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconLarge({iconUrl: housefire});
+            if(tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconLarge({iconUrl: housefireUrl});
             else if(tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconLarge({iconUrl: fireUrl});
             else if(tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconLarge({iconUrl: crashUrl});
             else tapausIcon = new LeafIconLarge({iconUrl: sirenUrl});
@@ -98,7 +99,8 @@ const setMapPoints = (tapaus) =>{
             break;
     }
     const marker = L.marker(tapaus.koordinaatit, {icon: tapausIcon});
-    marker.bindPopup(`<b>${tapaus.kaupunki}</b><br>${tapaus.tapahtuma}`);
+    //Markerin teksti
+    marker.bindPopup(`<b>${formatTime(tapaus)}</b><br>${tapaus.kaupunki}: ${tapaus.tapahtuma}`);
     return marker;
 };
 
@@ -134,7 +136,7 @@ const parseXmlData = async (data) =>{
 };
 
 //Printaa sivulle tiedot ul listaan
-//Jos haluaa maksimimäärän listan 
+//Voi antaa määrän, mutta jos ei anna tulostaa funktio kaikki tiedossa olevat sivulle 
 const printToSite = async (amount = -1, filter = null) =>{
     data = await getData();
     const markers = L.markerClusterGroup({maxClusterRadius: 20});
@@ -162,60 +164,34 @@ const printToSite = async (amount = -1, filter = null) =>{
         const setKaupauningit = new Set();
         
         menu.onchange = () => {
-            showCity(menu.value);
+            showKaupunki(menu.value);
         }
-        data.forEach(async ilmoitus => {
-            
-            const kaupunki = document.createElement("td");
-            
-            const aika = document.createElement("td");
-            const tapahtuma = document.createElement("td");
-            
-            const tr = document.createElement("tr");
-            tr.addEventListener("click", () => {
-                map.flyTo(ilmoitus.koordinaatit, 10);
-            });
-            kaupunki.innerText = ilmoitus.kaupunki;
-            tapahtuma.innerText = ilmoitus.tapahtuma;
-            
-            setKaupauningit.add(ilmoitus.kaupunki);
-            
-            const dd = ilmoitus.aika.getDate();
-            const mm = ilmoitus.aika.getMonth();
-            
-            const hh = ilmoitus.aika.getHours();
-            const min = ilmoitus.aika.getMinutes(); 
-            const ss = ilmoitus.aika.getSeconds();
-            
-            aika.innerText = `${dd}.${mm} - ${hh}:${min}:${ss}`;
-            tr.appendChild(kaupunki);
-            tr.appendChild(aika);
-            tr.appendChild(tapahtuma);
-            
-            tabel.querySelector("tbody").appendChild(tr);
-            
-            const marker = setMapPoints(ilmoitus);
+
+        for(const ilmoitus in data){
+            createTableRow(data, ilmoitus, tabel.querySelector("tbody"));
+            setKaupauningit.add(data[ilmoitus].kaupunki);
+            const marker = setMapPoints(data[ilmoitus]);
             markers.addLayer(marker);
-        });
+        }
         
         const arrayKaupungit = Array.from(setKaupauningit).sort();
-        arrayKaupungit.forEach((city) => {
+        arrayKaupungit.forEach((kaupunki) => {
             const item = document.createElement("option");
-            item.value = city;
-            item.innerText = city;
+            item.value = kaupunki;
+            item.innerText = kaupunki;
             menu.appendChild(item);
         })
     }
     map.addLayer(markers);
 };
 
-const showCity = (city) => {
-    if(city !== "default"){
-        const koordinaatit = getKoordinaatit(city.split('/')[0]);
+const showKaupunki = (kaupunki) => {
+    if(kaupunki !== "default"){
+        const koordinaatit = getKoordinaatit(kaupunki.split('/')[0]);
         map.flyTo(koordinaatit, 10);
 
-        updateList(city);
-        getWeather(city.split('/')[0]);
+        updateList(kaupunki);
+        getWeather(kaupunki.split('/')[0]);
     }
     else{
         map.flyTo([65.9, 25.74], 5);
@@ -223,7 +199,7 @@ const showCity = (city) => {
     }
 }
 
-const updateList = (city = "default") =>{
+const updateList = (kaupunki = "default") =>{
     const oldList = document.querySelector("#table-scroll")
     const div = document.createElement("div");
     oldList.after(div);
@@ -243,37 +219,13 @@ const updateList = (city = "default") =>{
     Aika.innerText = "Aika";
     Tapahtuma.innerText = "Tapahtuma";
 
-    let filtterdList = data;
-    if(city !== "default"){
-        filtterdList = data.filter(tieto => tieto.kaupunki === city);
+    let dataList = data;
+    if(kaupunki !== "default"){
+        dataList = data.filter(tieto => tieto.kaupunki === kaupunki);
     }
 
-    for(const ilmoitus in filtterdList){
-        const kaupunki = document.createElement("td");
-        
-        const aika = document.createElement("td");
-        const tapahtuma = document.createElement("td");
-        
-        const tr = document.createElement("tr");
-        tr.addEventListener("click", () => {
-            map.flyTo(filtterdList[ilmoitus].koordinaatit, 10);
-        });
-        kaupunki.innerText = filtterdList[ilmoitus].kaupunki;
-        tapahtuma.innerText = filtterdList[ilmoitus].tapahtuma;
-        
-        const dd = filtterdList[ilmoitus].aika.getDate();
-        const mm = filtterdList[ilmoitus].aika.getMonth();
-        
-        const hh = filtterdList[ilmoitus].aika.getHours();
-        const min = filtterdList[ilmoitus].aika.getMinutes(); 
-        const ss = filtterdList[ilmoitus].aika.getSeconds();
-        
-        aika.innerText = `${dd}.${mm} - ${hh}:${min}:${ss}`;
-        tr.appendChild(kaupunki);
-        tr.appendChild(aika);
-        tr.appendChild(tapahtuma);
-        
-        tbody.appendChild(tr);
+    for(const ilmoitus in dataList){
+        createTableRow(dataList, ilmoitus, tbody);
     }
 
     tr.appendChild(Kaupunki);
@@ -286,8 +238,8 @@ const updateList = (city = "default") =>{
 }
 
 //Hea ensiksi paikkakunnan lähin sää asemma ja sen jälkeen hea sen asemman luvut
-const getWeather = async (city) =>{
-    const url = `https://www.ilmatieteenlaitos.fi/api/weather/forecasts?place=${city.toLowerCase()}`;
+const getWeather = async (kaupunki) =>{
+    const url = `https://www.ilmatieteenlaitos.fi/api/weather/forecasts?place=${kaupunki.toLowerCase()}`;
     let stationWind = "Ei tietoa";
     let stationVisibility = "Ei tietoa";
     let stationName = "Ei tietoa";
@@ -308,7 +260,7 @@ const getWeather = async (city) =>{
     else stationName = station.names[0].text;
 
     if(weather.hasOwnProperty("Visibility")){
-        const mToKm = weather.Visibility[weather.t2m.length -1][1] / 1000;
+        const mToKm = weather.Visibility[weather.Visibility.length -1][1] / 1000;
         stationVisibility = mToKm.toFixed(2) + " km";
     }
     if(weather.hasOwnProperty("WindSpeedMS")) stationWind = weather.WindSpeedMS[weather.t2m.length -1][1] + " m/s";
@@ -325,6 +277,39 @@ const getWeather = async (city) =>{
     htmlWeather.innerHTML = stationTemp;
 }
 
+function createTableRow(dataList, ilmoitus, tbody) {
+    const kaupunki = document.createElement("td");
+
+    const aika = document.createElement("td");
+    const tapahtuma = document.createElement("td");
+
+    const tr = document.createElement("tr");
+    tr.addEventListener("click", () => {
+        map.flyTo(dataList[ilmoitus].koordinaatit, 10);
+    });
+    kaupunki.innerText = dataList[ilmoitus].kaupunki;
+    tapahtuma.innerText = dataList[ilmoitus].tapahtuma;
+
+    aika.innerText = formatTime(dataList[ilmoitus]);
+    tr.appendChild(kaupunki);
+    tr.appendChild(aika);
+    tr.appendChild(tapahtuma);
+
+    tbody.appendChild(tr);
+}
+
+const formatTime = (data) =>{
+    const dd = data.aika.getDate();
+    const mm = data.aika.getMonth();
+    const yy = data.aika.getFullYear();
+
+    const hh = data.aika.getHours();
+    const min = data.aika.getMinutes();
+    const ss = data.aika.getSeconds();
+    return `${dd}.${mm}.${yy} - ${hh}:${min}:${ss}`;
+}
+
+//Hae annetun kaupungin koordinaatit
 async function getUnknownKoordinaatit(kaupunki) {
     const koordinaatit = await fetch(`http://api.digitransit.fi/geocoding/v1/search?text=${kaupunki}`)
         .then(response => response.json())
