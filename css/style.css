@@ -6,7 +6,8 @@ body{
     flex-flow: wrap;
     text-align-last: center;
     justify-content: center;
-    background-color: #f3f3f5;
+    background-color: #222E50;
+    color: white;
 }
 
 img {
@@ -14,6 +15,17 @@ img {
     height: auto;
 }
 
+footer{
+    background-color: #2c2e39;
+    overflow: hidden;
+    margin-top: 20px;
+    flex: 0 0 100%;
+    text-align-last: left;
+}
+  
+footer h3{
+    margin-left: 20px;
+}
   /* Add a black background color to the top navigation */
 
 .topnav {
@@ -83,11 +95,13 @@ table{
     border-spacing: 0 1em;
     border: 0px ;
     margin-left: 20px;
+    color: black;
 }
 th, td{
     padding: 10px;
     margin: 10px;
-    background-color: #f0c060;
+    background-color: #018E42;
+    color: white;
 }
 
 tr{
