@@ -28,10 +28,10 @@ const LeafIconLarge = L.Icon.extend({
 });
 
 //Kartta kuvakkeiden linkit
-const crashUrl = './icons/tieliikenne.png',
-    housefireUrl = './icons/palohälytys.png',
-    fireUrl = './icons/fire-48x48-fire.png',
-    sirenUrl = './icons/yleinen.png';
+const tieliikenneUrl = './icons/tieliikenne.png',
+    talopaloUrl = './icons/talopalo.png',
+    tuliUrl = './icons/palohalytys.png',
+    yleinenUrl = './icons/yleinen.png';
 //Ilmoitus objecti, joissa on kaikki saatu tieto hätätapauksesta
 class Ilmoitus {
     constructor(nkaupunki, ntapahtuma, naika, nkoordinaatit, nkoko) {
@@ -48,8 +48,6 @@ const loadMap = () => {
     map = L.map('map').setView([65.9, 25.74], 5);
 
     map.on('zoomend', () => {
-        console.log(map.getZoom())
-
         if (filter != "default" && map.getZoom() <= 8) {
             updateList("default");
         }
@@ -85,51 +83,51 @@ const setMapPoints = (tapaus) => {
     switch (tapaus.koko) {
     case "pieni":
         if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconSmall({
-            iconUrl: housefireUrl
+            iconUrl: talopaloUrl
         });
         else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconSmall({
-            iconUrl: fireUrl
+            iconUrl: tuliUrl
         });
         else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconSmall({
-            iconUrl: crashUrl
+            iconUrl: tieliikenneUrl
         });
         else tapausIcon = new LeafIconSmall({
-            iconUrl: sirenUrl
+            iconUrl: yleinenUrl
         });
         break;
     case "keskisuuri":
         if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconMid({
-            iconUrl: housefireUrl
+            iconUrl: talopaloUrl
         });
         else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconMid({
-            iconUrl: fireUrl
+            iconUrl: tuliUrl
         });
         else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconMid({
-            iconUrl: crashUrl
+            iconUrl: tieliikenneUrl
         });
         else tapausIcon = new LeafIconMid({
-            iconUrl: sirenUrl
+            iconUrl: yleinenUrl
         });
         break;
 
     case "suuri":
         if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconLarge({
-            iconUrl: housefireUrl
+            iconUrl: talopaloUrl
         });
         else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconLarge({
-            iconUrl: fireUrl
+            iconUrl: tuliUrl
         });
         else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconLarge({
-            iconUrl: crashUrl
+            iconUrl: tieliikenneUrl
         });
         else tapausIcon = new LeafIconLarge({
-            iconUrl: sirenUrl
+            iconUrl: yleinenUrl
         });
         break;
     default:
         console.log("Ei toiminu");
         tapausIcon = new LeafIconSmall({
-            iconUrl: sirenUrl
+            iconUrl: yleinenUrl
         });
         break;
     }
