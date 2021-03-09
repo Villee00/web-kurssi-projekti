@@ -489,7 +489,7 @@ var kaupungit = [
     },
     {
       name: "Kittilä",
-      coordinates: [24.9, 67.67]
+      coordinates: [24.91, 67.65]
     },
     {
       name: "Kolari",
@@ -629,7 +629,7 @@ var kaupungit = [
     },
     {
       name: "Kangasala",
-      coordinates: [24.08, 61.47]
+      coordinates: [24.03, 61.46]
     },
     {
       name: "Kihniö",
@@ -689,7 +689,7 @@ var kaupungit = [
     },
     {
       name: "Tampere",
-      coordinates: [23.76, 61.52]
+      coordinates: [23.76, 61.50]
     },
     {
       name: "Urjala",

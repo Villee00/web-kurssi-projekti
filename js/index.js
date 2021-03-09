@@ -6,6 +6,12 @@ const proxy = 'https://cors.bridged.cc/';
 let map = null;
 let data = null;
 let filter = null;
+const suomenKoordinaatit = [65.9, 25.74];
+
+let control;
+//Alussa anna helsingin koordinaatit
+let nykyisetKoordinaatit = [60.17, 24.94];
+let havaintoasemmaKoordinaatit = null;
 
 //Iconien kokojenmukaan 
 const LeafIconSmall = L.Icon.extend({
@@ -32,7 +38,7 @@ const tieliikenneUrl = './icons/tieliikenne.png',
     talopaloUrl = './icons/talopalo.png',
     tuliUrl = './icons/palohalytys.png',
     yleinenUrl = './icons/yleinen.png';
-//Ilmoitus objecti, joissa on kaikki saatu tieto hätätapauksesta
+//Ilmoitus obejekti, joissa on kaikki saatu tieto hätätapauksesta
 class Ilmoitus {
     constructor(nkaupunki, ntapahtuma, naika, nkoordinaatit, nkoko) {
         this.kaupunki = nkaupunki;
@@ -45,25 +51,33 @@ class Ilmoitus {
 
 //laittaa kartan sivustolle
 const loadMap = () => {
-    map = L.map('map').setView([65.9, 25.74], 5);
+    map = L.map('map').setView(suomenKoordinaatit, 5);
 
+    //Kun zoomia on otettu takaisin tarpeeksi kauas paluta hätätapaukset ja poista kartalla olevat reitit
     map.on('zoomend', () => {
-        if (filter != "default" && map.getZoom() <= 8) {
+        if (filter != "default" && map.getZoom() <= 7) {
             updateList("default");
+            if(control != null){
+                map.removeControl(control);
+                control = null;
+            }
         }
     })
+
+    //Tee kartta
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
 };
 
-//Hae RSS syötteestä tiedot ja tallenna ne objektiin, jotta niitä voi käyttää kartassa. (CORS ongelma vielä ei toimi))
+//Hae RSS syötteestä tiedot ja tallenna ne objektiin, jotta niitä voi käyttää kartassa.)
 const getData = async () => {
 
     const petoRSS = `${proxy}http://www.peto-media.fi/tiedotteet/rss.xml`;
     let dataTaulu = [];
 
+    //Käännä teksti iso-8859-1 muodosta.
     const decoder = new TextDecoder("iso-8859-1");
     await fetch(petoRSS)
         .then(response => response.arrayBuffer())
@@ -79,7 +93,7 @@ const setMapPoints = (tapaus) => {
     let tapausIcon = null;
 
     //vaihda kartalla olevan kuvakkeen koko hätätapauksen koosta riippuen
-    //jos koosta ei ole tieto pistetään kuvaka pienimmäksi
+    //jos tapauksen koosta ei ole tieto pistetään kuvaka pienimmäksi
     switch (tapaus.koko) {
     case "pieni":
         if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconSmall({
@@ -155,6 +169,7 @@ const parseXmlData = async (data) => {
     let ilmoitukset = [];
     const items = data.querySelector('channel').querySelectorAll('item');
 
+    //Tee jokaisesta tiedokkeesta oma lista tietue.
     for (let item = 0; item < items.length - 1; item++) {
         const kaupunki = items[item].querySelector('title').innerHTML.split(',')[0];
         const tapahtuma = items[item].querySelector('title').innerHTML.split(',')[1];
@@ -200,7 +215,6 @@ const printToSite = async (amount = -1, filter = null) => {
 
         menu.onchange = () => {
             showKaupunki(menu.value);
-
         }
 
         for (const ilmoitus in data) {
@@ -221,22 +235,26 @@ const printToSite = async (amount = -1, filter = null) => {
     map.addLayer(markers);
 };
 
+//Kaupunki filtteröinti.
 const showKaupunki = (kaupunki) => {
+    //Jos filtteristä on painettu "kaikki" lennätä kamera takaisin niin, että koko suomi näkyy
     if (kaupunki !== "default") {
         const koordinaatit = getKoordinaatit(kaupunki.split('/')[0]);
+        nykyisetKoordinaatit = koordinaatit;
         map.flyTo(koordinaatit, 10);
 
         updateList(kaupunki);
         getWeather(kaupunki.split('/')[0]);
     } else {
 
-        map.flyTo([65.9, 25.74], 5);
+        map.flyTo(suomenKoordinaatit, 5);
         updateList();
     }
     //Muuta filtteri annetuksi kaupungiksi
     filter = kaupunki;
 }
 
+//Päivitä tiedotteiden lista
 const updateList = (kaupunki = "default") => {
     const oldList = document.querySelector("#table-scroll")
     const div = document.createElement("div");
@@ -283,26 +301,25 @@ const getWeather = async (kaupunki) => {
     let stationName = "Ei tietoa";
     let stationTemp = "Ei tietoa";
 
-    const station = await fetch(url, {
-            "X-Requested-With": "XMLHttpRequest"
-        })
+    const station = await fetch(url)
         .then(response => response.json())
         .then(weatherData => weatherData.observationStations.stationData[0])
 
     const weather = await fetch(`https://www.ilmatieteenlaitos.fi/observation-data?station=${station.id}`)
         .then(response => response.json())
 
-    //Kaikki annetut asemmat ovat sää asemmia, joten tarkastus on turha
+    //Kaikki annetut asemmat ovat sääasemia, joten tarkastus lämpötilalle on turha
     stationTemp = weather.t2m[weather.t2m.length - 1][1] + " C";
-
+    havaintoasemmaKoordinaatit = [station.coordinates.latitude.text, station.coordinates.longitude.text]
     //Testaa mitä tietoa on asemmalla saatavilla
     if (station.names.hasOwnProperty("name")) stationName = station.names.name.text;
     else stationName = station.names[0].text;
-
+    //Näkyvyys havaintoasemmalla
     if (weather.hasOwnProperty("Visibility")) {
         const mToKm = weather.Visibility[weather.Visibility.length - 1][1] / 1000;
         stationVisibility = mToKm.toFixed(2) + " km";
     }
+    //Tuulen nopeus havaintoasemmalla
     if (weather.hasOwnProperty("WindSpeedMS")) stationWind = weather.WindSpeedMS[weather.t2m.length - 1][1] + " m/s";
 
 
@@ -317,6 +334,7 @@ const getWeather = async (kaupunki) => {
     htmlWeather.innerHTML = stationTemp;
 }
 
+//Rakentaa taulukkoon uuden rivin
 const createTableRow = (dataList, ilmoitus, tbody) => {
     const kaupunki = document.createElement("td");
 
@@ -324,6 +342,7 @@ const createTableRow = (dataList, ilmoitus, tbody) => {
     const tapahtuma = document.createElement("td");
 
     const tr = document.createElement("tr");
+    //Kun riviä klikataan lennätä kartta oikeaan kaupunkiin.
     tr.addEventListener("click", () => {
         map.flyTo(dataList[ilmoitus].koordinaatit, 10);
     });
@@ -338,6 +357,7 @@ const createTableRow = (dataList, ilmoitus, tbody) => {
     tbody.appendChild(tr);
 }
 
+//Rakentaa ajan näyttettävään muotoon
 const formatTime = (data) => {
     const dd = data.aika.getDate();
     const mm = data.aika.getMonth() + 1;
@@ -355,4 +375,20 @@ const getUnknownKoordinaatit = async (kaupunki) => {
         .then(response => response.json())
         .then(data => data.features[0].geometry.coordinates);
     return [koordinaatit[1], koordinaatit[0]];
+}
+
+//Tee kartalle reitti havaintoasemmalle ja filtteröidyn kaupungin välille 
+const getRoute = () =>{
+    if(control != null) map.removeControl(control);
+    try {
+        control = L.Routing.control({
+            waypoints: [
+              L.latLng(nykyisetKoordinaatit),
+              L.latLng(havaintoasemmaKoordinaatit)
+            ],
+            router: L.Routing.mapbox('pk.eyJ1IjoidmlsbGVlMDAiLCJhIjoiY2tscHU4a3AwMTZheDJ3cXJsMHpybTBlMyJ9.mFmrob0en09ghXHVfmoI6Q')
+          }).addTo(map);
+    } catch {
+        console.log("koordinaateissa ongelmia");
+    }
 }

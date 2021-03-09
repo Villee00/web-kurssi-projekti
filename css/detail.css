@@ -49,6 +49,7 @@ footer h3{
 #map { 
     height: 500px;
     flex-basis: 100%;
+    color: black;
 }
 header{
   font-family: 'Rubik';
@@ -78,6 +79,7 @@ th, td{
     background-color: #018E42;
     color: white;
     font-family: 'Karla';
+    cursor: pointer;
 }
 
 tr{
@@ -220,4 +222,25 @@ div.restored-item {
       opacity: 1;
       transform: scale(1);
   }
+}
+
+#havaintoRoute{
+  width: 100%;
+  border-radius: 0px 0px 25px 25px;
+  border: 0;
+  padding-bottom: 16px;
+  background-color: #2C3C4A;
+  margin-top: 5px;
+  padding-top: 10px;
+  cursor: pointer;
+}
+
+#havaintoRoute p{
+  margin: 0;
+}
+.leaflet-routing-alt table{
+  display: none;
+}
+.leaflet-routing-alt-minimized{
+  display: none;
 }
