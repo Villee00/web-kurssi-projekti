@@ -27,10 +27,11 @@ const LeafIconLarge = L.Icon.extend({
     }
 });
 
-const crashUrl = './icons/crash-48x48-126779.png',
-    housefireUrl = './icons/fire-48x48-house.png',
+//Kartta kuvakkeiden linkit
+const crashUrl = './icons/tieliikenne.png',
+    housefireUrl = './icons/palohälytys.png',
     fireUrl = './icons/fire-48x48-fire.png',
-    sirenUrl = './icons/siren-48x48-520570.png';
+    sirenUrl = './icons/yleinen.png';
 //Ilmoitus objecti, joissa on kaikki saatu tieto hätätapauksesta
 class Ilmoitus {
     constructor(nkaupunki, ntapahtuma, naika, nkoordinaatit, nkoko) {
