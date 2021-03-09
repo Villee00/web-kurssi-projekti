@@ -46,8 +46,8 @@
 <body>
     <nav class="topnav">
         <a href="index.html">Koti</a>
-        <a href="detail.html">Hätätapaukset</a>
-        <a href="#about">Meistä</a>
+        <a href="detail.html">HÃ¤tÃ¤tapaukset</a>
+        <a href="#about">MeistÃ¤</a>
         <a href="impress.html">Impress</a>
     </nav>
     <div id="impress">
@@ -56,25 +56,25 @@
         <div class="step box" data-x="350" data-y="700">
             <h4>Yleiskuvaus:</h4>
             <ul>
-                <li>Uimapaikkojen etsiminen kunnittain.</li>
-                <li>Kaikille uimareille. </li>
-                <li>Kartta näyttää uimapaikat joka kunnalta. </li>
-                <li>Uimahallit, -altaat, ja rannat. </li>
-                <li>Kylpylät, maauimalat ja talviuintipaikat.</li>
+                <li>- Hätätila näyttää käyttäjälle viimeaikaiset hätätapaukset ja niiden sijainnit</li>
+                <li>- Hätätapaukset näkyy kronologisessa järjestyksessä listassa uusimmasta vanhimpaan</li>
+                <li>- Listan vierestä löytyy myös kartta jossa näkyy hätätapauksien sijainnit</li>
+                <li</li>
+                <li></li>
             </ul>
     
         </div>
         <div class="step box" data-x="350" data-y="1400">
             <ul>
-                <li>Ensiksi valitaan kunta.</li>
-                <li>Kartta siirtyy kuntaan ja näyttää uimapaikat.</li>
-                <li>Samalla poistetaan vanhat merkit. </li>
-                <li>Kun klikkaa merkkia saa uimapaikan tiedot. </li>
-                <li>Reittiohjeet nappulaa painamalla pääsee Google Mapsiin.</li>
+                <li>- "Hätätapaukset" osiosta voi katsoa karttaa tarkemmin, sekä suodattaa tapaukset paikkakuntien mukaan</li>
+                <li>- Täältä myöskin löytyy yksinkertaiset sää informaatiot. Havaintoasemankin sijainnin saa valitsemalla paikkakuntasi ja painamalla "Reitti havaintoasemalle"</li>
+                <li>- Sivusto on siis helppo, nopea ja lähestyttävä tapa saada informaatiota hätätapauksista maanlaajuisesti sekä paikallisesti</li>
+                <li></li>
+                <li></li>
             </ul>
         </div>
         <div class="step box" data-x="350" data-y="2100">
-            <h4>Käytetyt APIt</h4>
+            <h4>KÃ¤ytetyt APIt</h4>
             <ul>
                 <li>Uimapaikkojen haku: http://lipas.cc.jyu.fi/api</li>
                 <li>Kuntien haku: https://data.stat.fi/api</li>
@@ -82,7 +82,7 @@
             </ul>
         </div>
         <div class="step box" data-x="1490" data-y="1000" data-rotate="90" id="haeKaupungit">
-            <h4 class="koodiOtsikko">Haetaan Suomen kunnat ja lisätään ne valikkoon niitä vastaavien koodien kanssa</h4>
+            <h4 class="koodiOtsikko">Haetaan Suomen kunnat ja lisÃ¤tÃ¤Ã¤n ne valikkoon niitÃ¤ vastaavien koodien kanssa</h4>
             <pre>
                 <code>
                     function haeKaupungit(){
@@ -92,7 +92,7 @@
                         }).then(function(kaupungit){
                             console.log(kaupungit);
     
-                            //lisätään kaupungit uuteen listaan.
+                            //lisÃ¤tÃ¤Ã¤n kaupungit uuteen listaan.
                             for (let i = 0; i < kaupungit.length; i++) {
                                 const kaupunki = {
                                     kaupunginNimi: kaupungit[i].classificationItemNames[0].name,
@@ -101,7 +101,7 @@
                                 kaupunkiLista.push(kaupunki);
                             }
                             console.log(kaupunkiLista);
-                            //lisätään kaupungit select-valikkoon
+                            //lisÃ¤tÃ¤Ã¤n kaupungit select-valikkoon
                             for (let i = 0; i < kaupunkiLista.length; i++) {
                                 const valinta = document.createElement('option');
                                 valinta.textContent = kaupunkiLista[i].kaupunginNimi;
@@ -148,7 +148,7 @@
     
                         valitseKaupunki(3110);  // hakee uimahallit
                         valitseKaupunki(3120);  // hakee uima-altaat
-                        valitseKaupunki(3130);  // hakee kylpylät
+                        valitseKaupunki(3130);  // hakee kylpylÃ¤t
                         valitseKaupunki(3210);  // hakee maauimalat
                         valitseKaupunki(3220);  // hakee uimarannat
                         valitseKaupunki(3230);  // hakee uimapaikat
@@ -160,11 +160,11 @@
             </pre>
         </div>
         <div class="step box" data-x="2640" data-y="1400">
-            <h4>Siirretään karttaa kunnan mukaan</h4>
+            <h4>SiirretÃ¤Ã¤n karttaa kunnan mukaan</h4>
             <pre>
                 <code>
                     function siirraKarttaa(valinta){
-                      lisaaMarker(paikka, 'Olen tässä');
+                      lisaaMarker(paikka, 'Olen tÃ¤ssÃ¤');
                       valinta = valikko[valikko.selectedIndex].text;
                       if (valinta != 'Valitse Kaupunki'){
                         fetch(`${proxy}http://api.digitransit.fi/geocoding/v1/search?text=${valinta}`).
@@ -190,7 +190,7 @@
             </pre>
         </div>
         <div class="step box" data-x="2640" data-y="700" id="uimapaikat">
-            <h4>Lisätään uimapaikat kartalle</h4>
+            <h4>LisÃ¤tÃ¤Ã¤n uimapaikat kartalle</h4>
             <pre>
                 <code>
                     function uimahallit(uimahallit){
@@ -207,7 +207,7 @@
                           lisaaMarker(koordinaatit, uimahallit[i].name, blueIcon, false, uimahallit[i]);
                         } else if (tyyppi === "Uima-allas") {
                           lisaaMarker(koordinaatit, uimahallit[i].name, orangeIcon, false, uimahallit[i]);
-                        } else if (tyyppi === "Kylpylä") {
+                        } else if (tyyppi === "KylpylÃ¤") {
                           lisaaMarker(koordinaatit, uimahallit[i].name, goldIcon, false, uimahallit[i]);
                         } else if (tyyppi === "Maauimala") {
                           lisaaMarker(koordinaatit, uimahallit[i].name, greenIcon, false, uimahallit[i]);
