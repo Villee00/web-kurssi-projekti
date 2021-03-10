@@ -38,6 +38,7 @@ const tieliikenneUrl = './icons/tieliikenne.png',
     talopaloUrl = './icons/talopalo.png',
     tuliUrl = './icons/palohalytys.png',
     yleinenUrl = './icons/yleinen.png';
+    
 //Ilmoitus obejekti, joissa on kaikki saatu tieto hätätapauksesta
 class Ilmoitus {
     constructor(nkaupunki, ntapahtuma, naika, nkoordinaatit, nkoko) {
