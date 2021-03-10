@@ -1,15 +1,18 @@
 body{
     font-family: 'Rubik';
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    flex-flow: wrap;
     text-align-last: center;
     justify-content: center;
     background-color: #222E50;
     color: white;
 }
 
+section{
+    display: flex;
+    flex-direction: column;
+    flex-flow: wrap;
+    justify-content: center;
+}
 img {
     max-width: 100%;
     height: auto;
@@ -55,10 +58,6 @@ footer h3{
   color: white;
 }
 
-
-section{
-    max-width: 300px;
-}
 nav{
     flex-basis: 100%;
 }
@@ -107,7 +106,7 @@ th, td{
 tr{
     outline: 2px #2c2e39 groove;
 }
-@media only screen and (max-width: 900px){
+@media only screen and (max-width: 1000px){
     table{
         flex: 0 0 100%;
         list-style: none;

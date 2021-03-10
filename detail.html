@@ -3,9 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
 
     <title>Hätätila</title>
     
@@ -37,46 +34,44 @@
         </nav>
     </header>
     <main>
-        <article>
-            <section id="filter">
-                <h2>Hätätapaukset</h2>
-                <b>Fillteröi kaupungilla</b>
-                <span class="custom-dropdown">
-                    <select name="kaupunkiList" id="kaupunkiList" > 
-                        <option value="default">Kaikki</option>
-                    </select>
-                </span>
-            </section>
-            <div id="map"></div>
-            <section id="data">
-                <div id="table-scroll">
-                    <table id="tapaukset">
-                        <thead>
-                            <tr>
-                                <th>Kaupunki</th>
-                                <th>Aika</th>
-                                <th>Tapahtuma</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-    
-                <div id="weather">
-                    <h1>Sää</h1>
-                    <div id="weather-city">
-                        <h3 id="weather-city-text"></h3>
-                    </div>
-                    <h2 id="lampo"></h2>
+        <section id="filter">
+            <h2>Hätätapaukset</h2>
+            <b>Fillteröi kaupungilla</b>
+            <span class="custom-dropdown">
+                <select name="kaupunkiList" id="kaupunkiList" > 
+                    <option value="default">Kaikki</option>
+                </select>
+            </span>
+        </section>
+        <div id="map"></div>
+        <section id="data">
+            <div id="table-scroll">
+                <table id="tapaukset">
+                    <thead>
+                        <tr>
+                            <th>Kaupunki</th>
+                            <th>Aika</th>
+                            <th>Tapahtuma</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
 
-                    <span>Tuuli:</span> <strong id="weather-wind-text"></strong>
-                    <br>
-                    <span>Näkyvyys:</span> <strong id="weather-visibility-text"></strong>
-                    <div id="havaintoRoute" onclick="getRoute()"><p>Reitti havaintoasemalle</p></div>
+            <div id="weather">
+                <h1>Sää</h1>
+                <div id="weather-city">
+                    <h3 id="weather-city-text"></h3>
                 </div>
-            </section>
-        </article>
+                <h2 id="lampo"></h2>
+
+                <span>Tuuli:</span> <strong id="weather-wind-text"></strong>
+                <br>
+                <span>Näkyvyys:</span> <strong id="weather-visibility-text"></strong>
+                <div id="havaintoRoute" onclick="getRoute()"><p>Reitti havaintoasemalle</p></div>
+            </div>
+        </section>
     </main>
 
     <footer>

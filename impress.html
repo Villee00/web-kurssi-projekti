@@ -6,51 +6,7 @@
     <title>Hätätila</title>
     <link rel="stylesheet" href="./fonts/stylesheet.css">
     <link rel="stylesheet" href="./css/style.css">
-    <style>
-        body{
-            text-align-last: auto;
-        }
-        .box {
-            display: block;
-            width: 850px;
-            height: 600px;
-            padding: 30px 50px;
-            background-color: white;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
-            border: 1px solid rgba(0, 0, 0, .3);
-            border-radius: 20px;
-            text-shadow: 0 2px 2px rgba(0, 0, 0, .1);
-            font-family: 'Karla', sans-serif;
-            font-size: 40px;
-            color: rgb(102, 102, 102);
-        }
-        pre {
-            font-size: 12px;
-            line-height: 1.5;
-        }
-        .koodiOtsikko {
-            margin-bottom: 10px;
-            margin-top: 10px
-        }
-        #haeKaupungit {
-            width: 1200px;
-        }
-        #yla {
-            height: 700px;
-            width: 1100px;
-            background: #018E42;
-        }
-        #petohaku h4{
-            margin: 0;
-        }
-        #switch h4{
-            margin: 0;
-        }
-        #switch{
-            width: 600px;
-            height: 700px;
-        }
-    </style>
+    <link rel="stylesheet" href="./css/impress.css">
 </head>
 <body>
     <nav class="topnav">
@@ -113,7 +69,7 @@
                             .then(data => dataTaulu = parseXmlData(data));
                         return dataTaulu;
                     };
-                    const parseXmlData = ()=> {
+                    const parseXmlData = async (data)=> {
                         for (let item = 0; item < items.length - 1; item++) {
                             const kaupunki = items[item].querySelector('title').innerHTML.split(',')[0];
                             const tapahtuma = items[item].querySelector('title').innerHTML.split(',')[1];
@@ -146,7 +102,7 @@
                             .then(weatherData => weatherData.observationStations.stationData[0])
                         
                         //hae saadulla asemalla sen tiedot
-                        const weather = await fetch(`https://www.ilmatieteenlaitos.fi/observation-data?asema=${asema.id}`)
+                        const weather = await fetch(`https://www.ilmatieteenlaitos.fi/observation-data?station=${asema.id}`)
                             .then(response => response.json())
                     
                         //Kaikki annetut asemat ovat sääasemia, joten tarkastus lämpötilalle on turha

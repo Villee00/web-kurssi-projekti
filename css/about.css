@@ -1,0 +1,17 @@
+img{
+    max-width: 300px;
+}
+section{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    
+}
+b{
+    flex-basis: 100%;
+}
+#tekijä{
+    height: 470px;
+    margin: 10px;
+}

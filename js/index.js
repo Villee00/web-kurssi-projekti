@@ -321,7 +321,7 @@ const getWeather = async (kaupunki) => {
         asemaVisibility = mToKm.toFixed(2) + " km";
     }
     //Tuulen nopeus havaintoasemalla
-    if (weather.hasOwnProperty("WindSpeedMS")) asemaWind = weather.WindSpeedMS[weather.t2m.length - 1][1] + " m/s";
+    if (weather.hasOwnProperty("WindSpeedMS")) asemaWind = weather.WindSpeedMS[weather.WindSpeedMS.length - 1][1] + " m/s";
 
 
     const htmlWeather = document.querySelector("#lampo");
@@ -372,7 +372,7 @@ const formatTime = (data) => {
 
 //Hae annetun kaupungin koordinaatit
 const getTuntemattomanKoordinaatit = async (kaupunki) => {
-    const koordinaatit = await fetch(`http://api.digitransit.fi/geocoding/v1/search?text=${kaupunki}`)
+    const koordinaatit = await fetch(`https://api.digitransit.fi/geocoding/v1/search?text=${kaupunki}`)
         .then(response => response.json())
         .then(data => data.features[0].geometry.coordinates);
     return [koordinaatit[1], koordinaatit[0]];
