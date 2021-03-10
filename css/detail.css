@@ -160,7 +160,7 @@ main{
   justify-content: space-around;
 }
 
-@media only screen and (max-width: 935px){
+@media only screen and (max-width: 1011px){
 
   #weather{
     flex: 0 0 90%;
