@@ -62,6 +62,7 @@ nav{
     flex-basis: 100%;
 }
 
+/*Muuta kartta sopivan kokoiseksi sivustolle  */
 #map { 
     height: 700px; 
     max-width: 400px;
@@ -94,7 +95,6 @@ table{
     border-spacing: 0 1em;
     border: 0px ;
     margin-left: 20px;
-    color: black;
 }
 th, td{
     padding: 10px;

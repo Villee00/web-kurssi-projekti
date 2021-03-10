@@ -11,7 +11,7 @@ section{
 b{
     flex-basis: 100%;
 }
-#tekijä{
+.tekijä{
     height: 470px;
     margin: 10px;
 }

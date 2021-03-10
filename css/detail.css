@@ -81,7 +81,6 @@ table {
 	margin-right: 20px;
 	overflow-x: auto;
 	overflow-y: auto;
-	color: black;
 }
 
 th,
@@ -188,8 +187,7 @@ thead tr th {
 }
 
 
-/* Piilota scrollbar tiedostoista */
-
+/* Piilota scrollbar taulukosta */
 #table-scroll::-webkit-scrollbar {
 	display: none;
 }

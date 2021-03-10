@@ -1,3 +1,4 @@
+//Lista kaupungeista, jotta niiden koordinaatien haku nopeutuisi
 var kaupungit = [
     {
       name: "Enonkoski",

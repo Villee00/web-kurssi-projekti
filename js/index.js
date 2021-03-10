@@ -1,5 +1,17 @@
-/*jshint esversion: 8 */
+/*jshint esversion: 10 */
 'use strict';
+
+//Ilmoitus obejekti, joissa on kaikki saatu tieto hätätapauksesta
+class Ilmoitus {
+    constructor(nkaupunki, ntapahtuma, naika, nkoordinaatit, nkoko) {
+        this.kaupunki = nkaupunki;
+        this.tapahtuma = ntapahtuma;
+        this.aika = naika;
+        this.koordinaatit = nkoordinaatit;
+        this.koko = nkoko;
+    }
+}
+
 
 //proxy rss sivulle
 const proxy = 'https://cors.bridged.cc/';
@@ -38,17 +50,7 @@ const tieliikenneUrl = './icons/tieliikenne.png',
     talopaloUrl = './icons/talopalo.png',
     tuliUrl = './icons/palohalytys.png',
     yleinenUrl = './icons/yleinen.png';
-    
-//Ilmoitus obejekti, joissa on kaikki saatu tieto hätätapauksesta
-class Ilmoitus {
-    constructor(nkaupunki, ntapahtuma, naika, nkoordinaatit, nkoko) {
-        this.kaupunki = nkaupunki;
-        this.tapahtuma = ntapahtuma;
-        this.aika = naika;
-        this.koordinaatit = nkoordinaatit;
-        this.koko = nkoko;
-    }
-}
+
 
 //laittaa kartan sivustolle
 const loadMap = () => {
@@ -58,12 +60,12 @@ const loadMap = () => {
     map.on('zoomend', () => {
         if (filter != "default" && map.getZoom() <= 7) {
             updateList("default");
-            if(control != null){
+            if (control != null) {
                 map.removeControl(control);
                 control = null;
             }
         }
-    })
+    });
 
     //Tee kartta
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -74,7 +76,7 @@ const loadMap = () => {
 
 //Hae RSS syötteestä tiedot ja tallenna ne objektiin, jotta niitä voi käyttää kartassa.)
 const getData = async () => {
-
+    //CORS ongelman takia lähtetään pyyntö proxyä käyttäen
     const petoRSS = `${proxy}http://www.peto-media.fi/tiedotteet/rss.xml`;
     let dataTaulu = [];
 
@@ -96,55 +98,55 @@ const setMapPoints = (tapaus) => {
     //vaihda kartalla olevan kuvakkeen koko hätätapauksen koosta riippuen
     //jos tapauksen koosta ei ole tieto pistetään kuvaka pienimmäksi
     switch (tapaus.koko) {
-        case "pieni":
-            if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconSmall({
-                iconUrl: talopaloUrl
-            });
-            else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconSmall({
-                iconUrl: tuliUrl
-            });
-            else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconSmall({
-                iconUrl: tieliikenneUrl
-            });
-            else tapausIcon = new LeafIconSmall({
-                iconUrl: yleinenUrl
-            });
-            break;
-        case "keskisuuri":
-            if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconMid({
-                iconUrl: talopaloUrl
-            });
-            else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconMid({
-                iconUrl: tuliUrl
-            });
-            else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconMid({
-                iconUrl: tieliikenneUrl
-            });
-            else tapausIcon = new LeafIconMid({
-                iconUrl: yleinenUrl
-            });
-            break;
-        
-        case "suuri":
-            if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconLarge({
-                iconUrl: talopaloUrl
-            });
-            else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconLarge({
-                iconUrl: tuliUrl
-            });
-            else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconLarge({
-                iconUrl: tieliikenneUrl
-            });
-            else tapausIcon = new LeafIconLarge({
-                iconUrl: yleinenUrl
-            });
-            break;
-        default:
-            console.log("Ei toiminu");
-            tapausIcon = new LeafIconSmall({
-                iconUrl: yleinenUrl
-            });
-            break;
+    case "pieni":
+        if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconSmall({
+            iconUrl: talopaloUrl
+        });
+        else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconSmall({
+            iconUrl: tuliUrl
+        });
+        else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconSmall({
+            iconUrl: tieliikenneUrl
+        });
+        else tapausIcon = new LeafIconSmall({
+            iconUrl: yleinenUrl
+        });
+        break;
+    case "keskisuuri":
+        if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconMid({
+            iconUrl: talopaloUrl
+        });
+        else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconMid({
+            iconUrl: tuliUrl
+        });
+        else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconMid({
+            iconUrl: tieliikenneUrl
+        });
+        else tapausIcon = new LeafIconMid({
+            iconUrl: yleinenUrl
+        });
+        break;
+
+    case "suuri":
+        if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconLarge({
+            iconUrl: talopaloUrl
+        });
+        else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconLarge({
+            iconUrl: tuliUrl
+        });
+        else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconLarge({
+            iconUrl: tieliikenneUrl
+        });
+        else tapausIcon = new LeafIconLarge({
+            iconUrl: yleinenUrl
+        });
+        break;
+    default:
+        console.log("Ei toiminu");
+        tapausIcon = new LeafIconSmall({
+            iconUrl: yleinenUrl
+        });
+        break;
     }
     const marker = L.marker(tapaus.koordinaatit, {
         icon: tapausIcon
@@ -157,6 +159,7 @@ const setMapPoints = (tapaus) => {
 //Hea koordinaatit kaupungit.js tiedostosta
 const getKoordinaatit = (kaupunki) => {
     const koordinaatit = kaupungit.find(etsiKaupunki => etsiKaupunki.name === kaupunki);
+    //Jos kaupungit.js ei ole tietoa kaupungista hae sen koordinaatit netistä
     if (koordinaatit === undefined) {
         return getTuntemattomanKoordinaatit(kaupunki);
     }
@@ -194,7 +197,7 @@ const printToSite = async (amount = -1) => {
     });
     const tabel = document.querySelector('#tapaukset');
 
-
+    //Tarkista onko haluttua määrää annettu. Jos ei sioita taulukkoon kaikki saatu tieto
     if (amount >= 0) {
         for (let item = 0; item < amount; item++) {
             const kaupunki = document.createElement("td");
@@ -211,11 +214,13 @@ const printToSite = async (amount = -1) => {
         }
     } else {
         const menu = document.querySelector("select");
+        //Käytä set listaa, jotta saman nimisä kaupunkeja ei tulisi filtteriin vaihtoehdoiksi
         const setKaupauningit = new Set();
 
+        //Kun filtterisitä valitaan kaupunki päivitä koko sivu tarvittavilla tiedoilla
         menu.onchange = () => {
             showKaupunki(menu.value);
-        }
+        };
 
         for (const ilmoitus in data) {
             createTableRow(data, ilmoitus, tabel.querySelector("tbody"));
@@ -230,7 +235,7 @@ const printToSite = async (amount = -1) => {
             item.value = kaupunki;
             item.innerText = kaupunki;
             menu.appendChild(item);
-        })
+        });
     }
     map.addLayer(markers);
 };
@@ -246,17 +251,18 @@ const showKaupunki = (kaupunki) => {
         updateList(kaupunki);
         getWeather(kaupunki.split('/')[0]);
     } else {
-
+        //aseta kartta suomenpäälle
         map.flyTo(suomenKoordinaatit, 5);
         updateList();
     }
     //Muuta filtteri annetuksi kaupungiksi
     filter = kaupunki;
-}
+};
 
 //Päivitä tiedotteiden lista
 const updateList = (kaupunki = "default") => {
-    const oldList = document.querySelector("#table-scroll")
+    //Poista lista ja tee sen tilalle kokonaan uusi lista
+    const oldList = document.querySelector("#table-scroll");
     const div = document.createElement("div");
     oldList.after(div);
     oldList.remove();
@@ -276,6 +282,7 @@ const updateList = (kaupunki = "default") => {
     Tapahtuma.innerText = "Tapahtuma";
 
     let dataList = data;
+    //Jos kaupungille on annettu filtteri
     if (kaupunki !== "default") {
         dataList = data.filter(tieto => tieto.kaupunki === kaupunki);
     }
@@ -291,7 +298,7 @@ const updateList = (kaupunki = "default") => {
     table.appendChild(thead);
     table.appendChild(tbody);
     div.appendChild(table);
-}
+};
 
 //Hea ensiksi paikkakunnan lähin sääasema ja sen jälkeen hea sen aseman luvut
 const getWeather = async (kaupunki) => {
@@ -304,15 +311,17 @@ const getWeather = async (kaupunki) => {
     //valitse ensimmäinen 
     const asema = await fetch(url)
         .then(response => response.json())
-        .then(weatherData => weatherData.observationStations.stationData[0])
+        .then(weatherData => weatherData.observationStations.stationData[0]);
 
+    //hae asemman 
     const weather = await fetch(`https://www.ilmatieteenlaitos.fi/observation-data?station=${asema.id}`)
-        .then(response => response.json())
+        .then(response => response.json());
 
-    //Kaikki annetut asemat ovat sääasemia, joten tarkastus lämpötilalle on turha
+    //Asemman lämpösijaitsee t2m nimisessä kentässä
+    if (asema.names.hasOwnProperty("t2m")) asemaTemp = weather.t2m[weather.t2m.length - 1][1] + " C";;
     asemaTemp = weather.t2m[weather.t2m.length - 1][1] + " C";
-    havaintoasemaKoordinaatit = [asema.coordinates.latitude.text, asema.coordinates.longitude.text]
-    //Testaa mitä tietoa on asemalla saatavilla
+    havaintoasemaKoordinaatit = [asema.coordinates.latitude.text, asema.coordinates.longitude.text];
+    //Joidenkin asemmien nimet ovat suomeksi ja ruotsiksi, joten tarkastetaan kummin se on
     if (asema.names.hasOwnProperty("name")) asemaName = asema.names.name.text;
     else asemaName = asema.names[0].text;
     //Näkyvyys havaintoasemalla
@@ -333,7 +342,7 @@ const getWeather = async (kaupunki) => {
     windTxt.innerHTML = asemaWind;
     visibilityTxt.innerHTML = asemaVisibility;
     htmlWeather.innerHTML = asemaTemp;
-}
+};
 
 //Rakentaa taulukkoon uuden rivin
 const createTableRow = (dataList, ilmoitus, tbody) => {
@@ -343,7 +352,7 @@ const createTableRow = (dataList, ilmoitus, tbody) => {
     const tapahtuma = document.createElement("td");
 
     const tr = document.createElement("tr");
-    //Kun riviä klikataan lennätä kartta oikeaan kaupunkiin.
+    //Kun taulukon riviä klikataan lennätä kartta oikeaan kaupunkiin.
     tr.addEventListener("click", () => {
         map.flyTo(dataList[ilmoitus].koordinaatit, 10);
     });
@@ -356,7 +365,7 @@ const createTableRow = (dataList, ilmoitus, tbody) => {
     tr.appendChild(tapahtuma);
 
     tbody.appendChild(tr);
-}
+};
 
 //Rakentaa ajan näyttettävään muotoon
 const formatTime = (data) => {
@@ -368,7 +377,7 @@ const formatTime = (data) => {
     const min = data.aika.getMinutes();
     const ss = data.aika.getSeconds();
     return `${dd}.${mm}.${yy} - ${hh}:${min}:${ss}`;
-}
+};
 
 //Hae annetun kaupungin koordinaatit
 const getTuntemattomanKoordinaatit = async (kaupunki) => {
@@ -376,20 +385,21 @@ const getTuntemattomanKoordinaatit = async (kaupunki) => {
         .then(response => response.json())
         .then(data => data.features[0].geometry.coordinates);
     return [koordinaatit[1], koordinaatit[0]];
-}
+};
 
 //Tee kartalle reitti havaintoasemalle ja filtteröidyn kaupungin välille 
-const getRoute = () =>{
-    if(control != null) map.removeControl(control);
+const getRoute = () => {
+    //Jos kartalla on jo reitti poista se ennen uuden tekemistä
+    if (control != null) map.removeControl(control);
     try {
         control = L.Routing.control({
             waypoints: [
-              L.latLng(nykyisetKoordinaatit),
-              L.latLng(havaintoasemaKoordinaatit)
+                L.latLng(nykyisetKoordinaatit),
+                L.latLng(havaintoasemaKoordinaatit)
             ],
             router: L.Routing.mapbox('pk.eyJ1IjoidmlsbGVlMDAiLCJhIjoiY2tscHU4a3AwMTZheDJ3cXJsMHpybTBlMyJ9.mFmrob0en09ghXHVfmoI6Q')
-          }).addTo(map);
+        }).addTo(map);
     } catch {
         console.log("koordinaateissa ongelmia");
     }
-}
+};
