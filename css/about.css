@@ -1,23 +1,21 @@
 #antti{
-    height: 700px;
+    height: 500px;
     max-width: 400px;
     min-width: 300px;
     align-self:flex-start;
     flex: 0 0 50%;
 }
 #joona{
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    flex-flow: wrap;
-    text-align-last: center;
-    justify-content: center;
+    height: 500px;
+    max-width: 400px;
+    min-width: 300px;
+    align-self:flex-start;
+    flex: 0 0 50%;
 }
 #ville{
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    flex-flow: wrap;
-    text-align-last: right;
-    justify-content: right;
+    height: 500px;
+    max-width: 400px;
+    min-width: 300px;
+    align-self:flex-start;
+    flex: 0 0 50%;
 }
