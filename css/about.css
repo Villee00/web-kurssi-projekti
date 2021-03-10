@@ -6,12 +6,12 @@ section{
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    
 }
 b{
     flex-basis: 100%;
 }
 .tekijä{
+    flex: 0 0 20%;
     height: 470px;
     margin: 10px;
 }
