@@ -7,9 +7,12 @@
     <link rel="stylesheet" href="./fonts/stylesheet.css">
     <link rel="stylesheet" href="./css/style.css">
     <style>
+        body{
+            text-align-last: auto;
+        }
         .box {
             display: block;
-            width: 800px;
+            width: 850px;
             height: 600px;
             padding: 30px 50px;
             background-color: white;
@@ -35,19 +38,25 @@
         #yla {
             height: 700px;
             width: 1100px;
-            background: #f96e46;
+            background: #018E42;
         }
-        #uimapaikat h4{
-            margin-bottom: 10px;
-            margin-top: 15px;
+        #petohaku h4{
+            margin: 0;
+        }
+        #switch h4{
+            margin: 0;
+        }
+        #switch{
+            width: 600px;
+            height: 700px;
         }
     </style>
 </head>
 <body>
     <nav class="topnav">
         <a href="index.html">Koti</a>
-        <a href="detail.html">HÃ¤tÃ¤tapaukset</a>
-        <a href="#about">MeistÃ¤</a>
+        <a href="detail.html">Hätätapaukset</a>
+        <a href="#about">Meistä</a>
         <a href="impress.html">Impress</a>
     </nav>
     <div id="impress">
@@ -73,155 +82,177 @@
                 <li></li>
             </ul>
         </div>
-        <div class="step box" data-x="350" data-y="2100">
-            <h4>KÃ¤ytetyt APIt</h4>
+        <div class="step box" data-x="350" data-y="2100" >
+            <h4>Käytettyt apit</h4>
             <ul>
-                <li>Uimapaikkojen haku: http://lipas.cc.jyu.fi/api</li>
-                <li>Kuntien haku: https://data.stat.fi/api</li>
-                <li>Geokoodaus: http://api.digitransit.fi/geocoding/v1/search</li>
+                <li><b>Hätätapauksien hakuun: </b>http://www.peto-media.fi/tiedotteet/rss.xml</li>
+                <li><b>Geo lokaatiot:</b> http://api.digitransit.fi/geocoding</li>
+                <li><b>Sää havaintoasemma:</b> https://www.ilmatieteenlaitos.fi/api/weather/</li>
+                <li><b>Havaintoasemman data:</b> https://www.ilmatieteenlaitos.fi/observation-data</li>
             </ul>
+            <br>
         </div>
-        <div class="step box" data-x="1490" data-y="1000" data-rotate="90" id="haeKaupungit">
-            <h4 class="koodiOtsikko">Haetaan Suomen kunnat ja lisÃ¤tÃ¤Ã¤n ne valikkoon niitÃ¤ vastaavien koodien kanssa</h4>
+        
+        <div class="step box" data-x="1490" data-y="1000" data-rotate="90" id="petohaku">
+            <h4>Hae hätätapaukset petomediasta</h4>
             <pre>
                 <code>
-                    function haeKaupungit(){
-                        fetch(`${proxy}https://data.stat.fi/api/classifications/v2/classifications/kunta_1_20200101/classificationItems?content=data&format=json&lang=fi&meta=max`).
-                        then(function(vastaus){
-                            return vastaus.json();
-                        }).then(function(kaupungit){
-                            console.log(kaupungit);
-    
-                            //lisÃ¤tÃ¤Ã¤n kaupungit uuteen listaan.
-                            for (let i = 0; i < kaupungit.length; i++) {
-                                const kaupunki = {
-                                    kaupunginNimi: kaupungit[i].classificationItemNames[0].name,
-                                    kaupunginKoodi: parseInt(kaupungit[i].code)
-                                }
-                                kaupunkiLista.push(kaupunki);
-                            }
-                            console.log(kaupunkiLista);
-                            //lisÃ¤tÃ¤Ã¤n kaupungit select-valikkoon
-                            for (let i = 0; i < kaupunkiLista.length; i++) {
-                                const valinta = document.createElement('option');
-                                valinta.textContent = kaupunkiLista[i].kaupunginNimi;
-                                valinta.value = kaupunkiLista[i].kaupunginKoodi;
-                                valikko.appendChild(valinta);
-    
-                            }
-                        });
+                    const getData = async () => {
+
+                        const petoRSS = `${proxy}http://www.peto-media.fi/tiedotteet/rss.xml`;
+                        let dataTaulu = [];
+                    
+                        //Käännä teksti iso-8859-1 muodosta.
+                        const decoder = new TextDecoder("iso-8859-1");
+                        await fetch(petoRSS)
+                            .then(response => response.arrayBuffer())
+                            .then((buffer) => {
+                                const str = decoder.decode(buffer);
+                                return new window.DOMParser().parseFromString(str, "text/xml");
+                            })
+                            .then(data => dataTaulu = parseXmlData(data));
+                        return dataTaulu;
+                    };
+                    const parseXmlData = ()=> {
+                        for (let item = 0; item < items.length - 1; item++) {
+                            const kaupunki = items[item].querySelector('title').innerHTML.split(',')[0];
+                            const tapahtuma = items[item].querySelector('title').innerHTML.split(',')[1];
+                            const aika = new Date(items[item].querySelector('pubDate').innerHTML);
+                            const koordinaatit = await getKoordinaatit(kaupunki.split('/')[0]);
+                            let koko = "pieni";
+                            if (tapahtuma.split(": ").length >= 2) koko = tapahtuma.split(":")[1].replace(/ /g, '');
+                    
+                            ilmoitukset.push(new Ilmoitus(kaupunki, tapahtuma, aika, koordinaatit, koko));
+                        }
                     }
+                    
                 </code>
             </pre>
         </div>
-        <div class="step box" data-x="1500" data-y="2100" id="valitseKaupunki">
-            <h4>Valitaan uimapaikat kunnittain</h4>
+        <div class="step box" data-x="1500" data-y="2100" id="haeKaupungit">
+            <h4 class="koodiOtsikko">Hae kaupungille sää</h4>
             <pre>
                 <code>
-                    function valitseKaupunki(koodi, valinta){
-                        markkerit.clearLayers();
-                        valinta = valikko[valikko.selectedIndex].value;
-                        if (valinta != 0) {
-                            fetch(
-                                `${proxy}http://lipas.cc.jyu.fi/api/sports-places?typeCodes=${koodi}&fields=name&fields=phoneNumber
-                                &fields=location.address&fields=location.postalCode&fields=location.city.name&
-                                fields=location.coordinates.wgs84&fields=constructionYear&pageSize=100&cityCodes=${valinta}&
-                                fields=www&fields=email`).
-                            then(function(vastaus) {
-                                return vastaus.json();
-                            }).then(function(hallit) {
-                                uimahallit(hallit);
-                            });
-                            siirraKarttaa(valinta);
+                    const getWeather = async (kaupunki) => {
+                        const url = `https://www.ilmatieteenlaitos.fi/api/weather/forecasts?place=${kaupunki.toLowerCase()}`;
+                        let asemaWind = "Ei tietoa";
+                        let asemaVisibility = "Ei tietoa";
+                        let asemaName = "Ei tietoa";
+                        let asemaTemp = "Ei tietoa";
+                    
+                        //valitse ensimmäinen sää asema
+                        const asema = await fetch(url)
+                            .then(response => response.json())
+                            .then(weatherData => weatherData.observationStations.stationData[0])
+                        
+                        //hae saadulla asemalla sen tiedot
+                        const weather = await fetch(`https://www.ilmatieteenlaitos.fi/observation-data?asema=${asema.id}`)
+                            .then(response => response.json())
+                    
+                        //Kaikki annetut asemat ovat sääasemia, joten tarkastus lämpötilalle on turha
+                        asemaTemp = weather.t2m[weather.t2m.length - 1][1] + " C";
+                        havaintoasemaKoordinaatit = [asema.coordinates.latitude.text, asema.coordinates.longitude.text]
+                        //Testaa mitä tietoa on asemalla saatavilla
+                        if (asema.names.hasOwnProperty("name")) asemaName = asema.names.name.text;
+                        else asemaName = asema.names[0].text;
+                        //Näkyvyys havaintoasemalla
+                        if (weather.hasOwnProperty("Visibility")) {
+                            const mToKm = weather.Visibility[weather.Visibility.length - 1][1] / 1000;
+                            asemaVisibility = mToKm.toFixed(2) + " km";
                         }
-    
-                    }
+                        //Tuulen nopeus havaintoasemalla
+                        if (weather.hasOwnProperty("WindSpeedMS")) asemaWind = weather.WindSpeedMS[weather.t2m.length - 1][1] + " m/s";
+                    };                                      
                 </code>
             </pre>
         </div>
         <div class="step box" data-x="2640" data-y="2100">
-            <h4>Haetaan uimapaikat koodeittan koodeittan</h4>
+            <h4>Kaupunkien koordinaattien haku</h4>
             <pre>
                 <code>
-                    //uimahallien haku koodien eli eri tyyppien mukaan
-                    function uimapaikkojenHaku(){
-    
-                        valitseKaupunki(3110);  // hakee uimahallit
-                        valitseKaupunki(3120);  // hakee uima-altaat
-                        valitseKaupunki(3130);  // hakee kylpylÃ¤t
-                        valitseKaupunki(3210);  // hakee maauimalat
-                        valitseKaupunki(3220);  // hakee uimarannat
-                        valitseKaupunki(3230);  // hakee uimapaikat
-                        valitseKaupunki(3240);  // hakee talviuintipaikat
-    
-                    }
-                    valikko.addEventListener('change', uimapaikkojenHaku);;
+                    const getKoordinaatit = (kaupunki) => {
+                        const koordinaatit = kaupungit.find(etsiKaupunki => etsiKaupunki.name === kaupunki);
+                        if (koordinaatit === undefined) {
+                            return getTuntemattomanKoordinaatit(kaupunki);
+                        }
+                        return [koordinaatit.coordinates[1], koordinaatit.coordinates[0]];
+                    };
+                    const getTuntemattomanKoordinaatit = async (kaupunki) => {
+                        const koordinaatit = await fetch(`http://api.digitransit.fi/geocoding/v1/search?text=${kaupunki}`)
+                            .then(response => response.json())
+                            .then(data => data.features[0].geometry.coordinates);
+                        return [koordinaatit[1], koordinaatit[0]];
+                    };
                 </code>
             </pre>
         </div>
         <div class="step box" data-x="2640" data-y="1400">
-            <h4>SiirretÃ¤Ã¤n karttaa kunnan mukaan</h4>
+            <h4>Kaupunkien laitto dropdown menuun</h4>
             <pre>
-                <code>
-                    function siirraKarttaa(valinta){
-                      lisaaMarker(paikka, 'Olen tÃ¤ssÃ¤');
-                      valinta = valikko[valikko.selectedIndex].text;
-                      if (valinta != 'Valitse Kaupunki'){
-                        fetch(`${proxy}http://api.digitransit.fi/geocoding/v1/search?text=${valinta}`).
-                            then(function(vastaus){
-                              return vastaus.json();
-                            }).then(function(kaupunginKoordinaatit){
-                              console.log(kaupunginKoordinaatit);
-                              for (let i = 0; i < kaupunginKoordinaatit.features.length; i++) {
-                                if (kaupunginKoordinaatit.features[i].properties.localadmin === valinta) {
-                                  const koordinaatit = {
-                                    lat: kaupunginKoordinaatit.features[i].geometry.coordinates[1],
-                                    long: kaupunginKoordinaatit.features[i].geometry.coordinates[0]
-                                  }
-    
-                                  map.flyTo([koordinaatit.lat, koordinaatit.long], 11);
-    
-                                }
-                              }
-                        });
-                      }
-                    }
+                <code>                   
+                const menu = document.querySelector("select");
+                const setKaupauningit = new Set();
+
+                menu.onchange = () => {
+                    showKaupunki(menu.value);
+                }
+
+                for (const ilmoitus in data) {
+                    createTableRow(data, ilmoitus, tabel.querySelector("tbody"));
+                    setKaupauningit.add(data[ilmoitus].kaupunki);
+                    const marker = setMapPoints(data[ilmoitus]);
+                    markers.addLayer(marker);
+                }
+
+                const arrayKaupungit = Array.from(setKaupauningit).sort();
+                arrayKaupungit.forEach((kaupunki) => {
+                    const item = document.createElement("option");
+                    item.value = kaupunki;
+                    item.innerText = kaupunki;
+                    menu.appendChild(item);
+                })
                 </code>
             </pre>
         </div>
-        <div class="step box" data-x="2640" data-y="700" id="uimapaikat">
-            <h4>LisÃ¤tÃ¤Ã¤n uimapaikat kartalle</h4>
+        <div class="step box" data-x="2640" data-y="700" data-rotate="-90" id="switch">
+            <h4>Ikonien koko valinta</h4>
             <pre>
                 <code>
-                    function uimahallit(uimahallit){
-                      console.log(uimahallit);
-                      for (let i = 0; i < uimahallit.length; i++) {
-                        const koordinaatit = {
-                          latitude: uimahallit[i].location.coordinates.wgs84.lat,
-                          longitude: uimahallit[i].location.coordinates.wgs84.lon
-                        };
-    
-                        let tyyppi = uimahallit[i].type.name;
-    
-                        if (tyyppi == "Uimahalli") {
-                          lisaaMarker(koordinaatit, uimahallit[i].name, blueIcon, false, uimahallit[i]);
-                        } else if (tyyppi === "Uima-allas") {
-                          lisaaMarker(koordinaatit, uimahallit[i].name, orangeIcon, false, uimahallit[i]);
-                        } else if (tyyppi === "KylpylÃ¤") {
-                          lisaaMarker(koordinaatit, uimahallit[i].name, goldIcon, false, uimahallit[i]);
-                        } else if (tyyppi === "Maauimala") {
-                          lisaaMarker(koordinaatit, uimahallit[i].name, greenIcon, false, uimahallit[i]);
-                        } else if (tyyppi === "Uimaranta") {
-                          lisaaMarker(koordinaatit, uimahallit[i].name, yellowIcon, false, uimahallit[i]);
-                        } else if (tyyppi === "Uimapaikka") {
-                          lisaaMarker(koordinaatit, uimahallit[i].name, greyIcon, false, uimahallit[i]);
-                        } else if (tyyppi === "Talviuintipaikka") {
-                          lisaaMarker(koordinaatit, uimahallit[i].name, violetIcon, false, uimahallit[i]);
-                        } else {
-                          lisaaMarker(koordinaatit, uimahallit[i].name, blackIcon, false, uimahallit[i]);
-                        }
-                      }
-                    }
+    switch (tapaus.koko) {
+        case "pieni":
+            if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconSmall({
+                iconUrl: talopaloUrl
+            });
+            ...
+            else tapausIcon = new LeafIconSmall({
+                iconUrl: yleinenUrl
+            });
+            break;
+        case "keskisuuri":
+            if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconMid({
+                iconUrl: talopaloUrl
+            });
+            ...
+            else tapausIcon = new LeafIconMid({
+                iconUrl: yleinenUrl
+            });
+            break;
+        
+        case "suuri":
+            if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconLarge({
+                iconUrl: talopaloUrl
+            });
+            ...
+            else tapausIcon = new LeafIconLarge({
+                iconUrl: yleinenUrl
+            });
+            break;
+        default:
+            tapausIcon = new LeafIconSmall({
+                iconUrl: yleinenUrl
+            });
+            break;
+        }                    
                 </code>
             </pre>
         </div>

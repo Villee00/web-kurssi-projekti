@@ -1,6 +1,6 @@
 //Lataa sivulle kartta
-loadMap()
+loadMap();
 //Hae ja sijoita taulukkoon hätätapaukset
-printToSite()
+printToSite();
 //Hae helsingin säätiedot sivulle
-getWeather("helsinki")
+getWeather("helsinki");

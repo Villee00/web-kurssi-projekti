@@ -177,7 +177,7 @@ var kaupungit = [
     },
     {
       name: "Tammela",
-      coordinates: [23.77, 60.8]
+      coordinates: [23.76, 60.81]
     },
     {
       name: "Tuulos",

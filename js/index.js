@@ -11,7 +11,7 @@ const suomenKoordinaatit = [65.9, 25.74];
 let control;
 //Alussa anna helsingin koordinaatit
 let nykyisetKoordinaatit = [60.17, 24.94];
-let havaintoasemmaKoordinaatit = null;
+let havaintoasemaKoordinaatit = null;
 
 //Iconien kokojenmukaan 
 const LeafIconSmall = L.Icon.extend({
@@ -95,55 +95,55 @@ const setMapPoints = (tapaus) => {
     //vaihda kartalla olevan kuvakkeen koko hätätapauksen koosta riippuen
     //jos tapauksen koosta ei ole tieto pistetään kuvaka pienimmäksi
     switch (tapaus.koko) {
-    case "pieni":
-        if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconSmall({
-            iconUrl: talopaloUrl
-        });
-        else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconSmall({
-            iconUrl: tuliUrl
-        });
-        else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconSmall({
-            iconUrl: tieliikenneUrl
-        });
-        else tapausIcon = new LeafIconSmall({
-            iconUrl: yleinenUrl
-        });
-        break;
-    case "keskisuuri":
-        if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconMid({
-            iconUrl: talopaloUrl
-        });
-        else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconMid({
-            iconUrl: tuliUrl
-        });
-        else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconMid({
-            iconUrl: tieliikenneUrl
-        });
-        else tapausIcon = new LeafIconMid({
-            iconUrl: yleinenUrl
-        });
-        break;
-
-    case "suuri":
-        if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconLarge({
-            iconUrl: talopaloUrl
-        });
-        else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconLarge({
-            iconUrl: tuliUrl
-        });
-        else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconLarge({
-            iconUrl: tieliikenneUrl
-        });
-        else tapausIcon = new LeafIconLarge({
-            iconUrl: yleinenUrl
-        });
-        break;
-    default:
-        console.log("Ei toiminu");
-        tapausIcon = new LeafIconSmall({
-            iconUrl: yleinenUrl
-        });
-        break;
+        case "pieni":
+            if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconSmall({
+                iconUrl: talopaloUrl
+            });
+            else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconSmall({
+                iconUrl: tuliUrl
+            });
+            else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconSmall({
+                iconUrl: tieliikenneUrl
+            });
+            else tapausIcon = new LeafIconSmall({
+                iconUrl: yleinenUrl
+            });
+            break;
+        case "keskisuuri":
+            if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconMid({
+                iconUrl: talopaloUrl
+            });
+            else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconMid({
+                iconUrl: tuliUrl
+            });
+            else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconMid({
+                iconUrl: tieliikenneUrl
+            });
+            else tapausIcon = new LeafIconMid({
+                iconUrl: yleinenUrl
+            });
+            break;
+        
+        case "suuri":
+            if (tapaus.tapahtuma.includes("rakennuspalo")) tapausIcon = new LeafIconLarge({
+                iconUrl: talopaloUrl
+            });
+            else if (tapaus.tapahtuma.includes("palohälytys")) tapausIcon = new LeafIconLarge({
+                iconUrl: tuliUrl
+            });
+            else if (tapaus.tapahtuma.includes("tieliikenneonnettomuus")) tapausIcon = new LeafIconLarge({
+                iconUrl: tieliikenneUrl
+            });
+            else tapausIcon = new LeafIconLarge({
+                iconUrl: yleinenUrl
+            });
+            break;
+        default:
+            console.log("Ei toiminu");
+            tapausIcon = new LeafIconSmall({
+                iconUrl: yleinenUrl
+            });
+            break;
     }
     const marker = L.marker(tapaus.koordinaatit, {
         icon: tapausIcon
@@ -155,9 +155,9 @@ const setMapPoints = (tapaus) => {
 
 //Hea koordinaatit kaupungit.js tiedostosta
 const getKoordinaatit = (kaupunki) => {
-    let koordinaatit = kaupungit.find(etsiKaupunki => etsiKaupunki.name === kaupunki);
+    const koordinaatit = kaupungit.find(etsiKaupunki => etsiKaupunki.name === kaupunki);
     if (koordinaatit === undefined) {
-        return getUnknownKoordinaatit(kaupunki);
+        return getTuntemattomanKoordinaatit(kaupunki);
     }
     return [koordinaatit.coordinates[1], koordinaatit.coordinates[0]];
 };
@@ -169,7 +169,7 @@ const parseXmlData = async (data) => {
     let ilmoitukset = [];
     const items = data.querySelector('channel').querySelectorAll('item');
 
-    //Tee jokaisesta tiedokkeesta oma lista tietue.
+    //Tee xmllästä saaduilla tiedoilla taulukko
     for (let item = 0; item < items.length - 1; item++) {
         const kaupunki = items[item].querySelector('title').innerHTML.split(',')[0];
         const tapahtuma = items[item].querySelector('title').innerHTML.split(',')[1];
@@ -186,7 +186,7 @@ const parseXmlData = async (data) => {
 
 //Printaa sivulle tiedot ul listaan
 //Voi antaa määrän, mutta jos ei anna tulostaa funktio kaikki tiedossa olevat sivulle 
-const printToSite = async (amount = -1, filter = null) => {
+const printToSite = async (amount = -1) => {
     data = await getData();
     const markers = L.markerClusterGroup({
         maxClusterRadius: 20
@@ -206,7 +206,6 @@ const printToSite = async (amount = -1, filter = null) => {
             tabel.querySelector("tbody").appendChild(tr);
 
             const marker = await setMapPoints(data[item]);
-            //if(multiMarkers) markers.addLayer(marker);
             marker.addTo(map);
         }
     } else {
@@ -293,34 +292,35 @@ const updateList = (kaupunki = "default") => {
     div.appendChild(table);
 }
 
-//Hea ensiksi paikkakunnan lähin sää asemma ja sen jälkeen hea sen asemman luvut
+//Hea ensiksi paikkakunnan lähin sääasema ja sen jälkeen hea sen aseman luvut
 const getWeather = async (kaupunki) => {
     const url = `https://www.ilmatieteenlaitos.fi/api/weather/forecasts?place=${kaupunki.toLowerCase()}`;
-    let stationWind = "Ei tietoa";
-    let stationVisibility = "Ei tietoa";
-    let stationName = "Ei tietoa";
-    let stationTemp = "Ei tietoa";
+    let asemaWind = "Ei tietoa";
+    let asemaVisibility = "Ei tietoa";
+    let asemaName = "Ei tietoa";
+    let asemaTemp = "Ei tietoa";
 
-    const station = await fetch(url)
+    //valitse ensimmäinen 
+    const asema = await fetch(url)
         .then(response => response.json())
         .then(weatherData => weatherData.observationStations.stationData[0])
 
-    const weather = await fetch(`https://www.ilmatieteenlaitos.fi/observation-data?station=${station.id}`)
+    const weather = await fetch(`https://www.ilmatieteenlaitos.fi/observation-data?station=${asema.id}`)
         .then(response => response.json())
 
-    //Kaikki annetut asemmat ovat sääasemia, joten tarkastus lämpötilalle on turha
-    stationTemp = weather.t2m[weather.t2m.length - 1][1] + " C";
-    havaintoasemmaKoordinaatit = [station.coordinates.latitude.text, station.coordinates.longitude.text]
-    //Testaa mitä tietoa on asemmalla saatavilla
-    if (station.names.hasOwnProperty("name")) stationName = station.names.name.text;
-    else stationName = station.names[0].text;
-    //Näkyvyys havaintoasemmalla
+    //Kaikki annetut asemat ovat sääasemia, joten tarkastus lämpötilalle on turha
+    asemaTemp = weather.t2m[weather.t2m.length - 1][1] + " C";
+    havaintoasemaKoordinaatit = [asema.coordinates.latitude.text, asema.coordinates.longitude.text]
+    //Testaa mitä tietoa on asemalla saatavilla
+    if (asema.names.hasOwnProperty("name")) asemaName = asema.names.name.text;
+    else asemaName = asema.names[0].text;
+    //Näkyvyys havaintoasemalla
     if (weather.hasOwnProperty("Visibility")) {
         const mToKm = weather.Visibility[weather.Visibility.length - 1][1] / 1000;
-        stationVisibility = mToKm.toFixed(2) + " km";
+        asemaVisibility = mToKm.toFixed(2) + " km";
     }
-    //Tuulen nopeus havaintoasemmalla
-    if (weather.hasOwnProperty("WindSpeedMS")) stationWind = weather.WindSpeedMS[weather.t2m.length - 1][1] + " m/s";
+    //Tuulen nopeus havaintoasemalla
+    if (weather.hasOwnProperty("WindSpeedMS")) asemaWind = weather.WindSpeedMS[weather.t2m.length - 1][1] + " m/s";
 
 
     const htmlWeather = document.querySelector("#lampo");
@@ -328,10 +328,10 @@ const getWeather = async (kaupunki) => {
     const windTxt = document.querySelector("#weather-wind-text");
     const visibilityTxt = document.querySelector("#weather-visibility-text");
 
-    p.innerHTML = stationName;
-    windTxt.innerHTML = stationWind;
-    visibilityTxt.innerHTML = stationVisibility;
-    htmlWeather.innerHTML = stationTemp;
+    p.innerHTML = asemaName;
+    windTxt.innerHTML = asemaWind;
+    visibilityTxt.innerHTML = asemaVisibility;
+    htmlWeather.innerHTML = asemaTemp;
 }
 
 //Rakentaa taulukkoon uuden rivin
@@ -370,21 +370,21 @@ const formatTime = (data) => {
 }
 
 //Hae annetun kaupungin koordinaatit
-const getUnknownKoordinaatit = async (kaupunki) => {
+const getTuntemattomanKoordinaatit = async (kaupunki) => {
     const koordinaatit = await fetch(`http://api.digitransit.fi/geocoding/v1/search?text=${kaupunki}`)
         .then(response => response.json())
         .then(data => data.features[0].geometry.coordinates);
     return [koordinaatit[1], koordinaatit[0]];
 }
 
-//Tee kartalle reitti havaintoasemmalle ja filtteröidyn kaupungin välille 
+//Tee kartalle reitti havaintoasemalle ja filtteröidyn kaupungin välille 
 const getRoute = () =>{
     if(control != null) map.removeControl(control);
     try {
         control = L.Routing.control({
             waypoints: [
               L.latLng(nykyisetKoordinaatit),
-              L.latLng(havaintoasemmaKoordinaatit)
+              L.latLng(havaintoasemaKoordinaatit)
             ],
             router: L.Routing.mapbox('pk.eyJ1IjoidmlsbGVlMDAiLCJhIjoiY2tscHU4a3AwMTZheDJ3cXJsMHpybTBlMyJ9.mFmrob0en09ghXHVfmoI6Q')
           }).addTo(map);

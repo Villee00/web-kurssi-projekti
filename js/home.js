@@ -1,2 +1,2 @@
-loadMap()
-printToSite(10)
+loadMap();
+printToSite(10);
